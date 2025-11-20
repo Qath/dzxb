@@ -1,879 +1,2773 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>喜庆电子礼薄</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>电子礼簿系统</title>
+    <script src="./static/tailwindcss.js"></script>
+    <script src="./static/xlsx.full.min.js"></script>
+    <script src="./static/crypto-js.min.js"></script>
+    <link href="./static/mermaid.min.css" rel="stylesheet" />
+    <link href="./static/remixicon.css" rel="stylesheet" />
+    <script src="./static/gridjs.umd.js"></script>
+    <link rel="preload" href="./static/bg.webp" as="image" type="image/webp" />
     <style>
-        /* 全局样式 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Microsoft YaHei', 'STKaiti', Arial, sans-serif;
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            color: #333;
-            line-height: 1.6;
-            padding: 0;
-            margin: 0;
-            min-height: 100vh;
-        }
-        
-        /* 喜庆元素 */
-        .bg-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e74c3c' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            z-index: -1;
-        }
-        
-        /* 页面容器 */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* 头部样式 */
-        header {
-            text-align: center;
-            padding: 30px 0;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #f12711 0%, #f5af19 100%);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        header::before,
-        header::after {
-            content: "🎉";
-            position: absolute;
-            font-size: 40px;
-            opacity: 0.8;
-        }
-        
-        header::before {
-            top: 10px;
-            left: 20px;
-            transform: rotate(-15deg);
-        }
-        
-        header::after {
-            top: 10px;
-            right: 20px;
-            transform: rotate(15deg);
-        }
-        
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            position: relative;
-            display: inline-block;
-        }
-        
-        header h1::after {
-            content: "";
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 150px;
-            height: 4px;
-            background: rgba(255,255,255,0.8);
-            border-radius: 2px;
-        }
-        
-        header p {
-            font-size: 1.2rem;
-            margin-top: 20px;
-            opacity: 0.9;
-        }
-        
-        /* 卡片样式 */
-        .card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            padding: 30px;
-            margin-bottom: 30px;
-            position: relative;
-            border: 2px solid #f5c71a;
-        }
-        
-        .card::before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #f12711 0%, #f5af19 100%);
-            border-radius: 50%;
-            z-index: -1;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        
-        .card h2 {
-            color: #c0392b;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #f5c71a;
-            position: relative;
-        }
-        
-        .card h2::after {
-            content: "✨";
-            margin-left: 10px;
-        }
-        
-        /* 表单样式 */
-        form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        form h2 {
-            grid-column: 1 / -1;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-        
-        label {
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #e74c3c;
-            font-size: 1.1rem;
-        }
-        
-        input, textarea {
-            padding: 12px 15px;
-            border: 2px solid #e1e1e1;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #f39c12;
-            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
-        }
-        
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            grid-column: 1 / -1;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-        
-        /* 表格样式 */
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #f1f1f1;
-        }
-        
-        th {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-            color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-        
-        tr:hover {
-            background-color: #fff9e6;
-            transform: scale(1.01);
-            transition: all 0.3s ease;
-        }
-        
-        /* 按钮样式 */
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-        
-        .btn-danger {
-            background-color: #e74c3c;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background-color: #c0392b;
-            transform: scale(1.05);
-        }
-        
-        /* 消息提示 */
-        .message {
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            position: relative;
-            animation: slideIn 0.5s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .message.success {
-            background-color: #d4edda;
-            color: #155724;
-            border-left: 4px solid #28a745;
-        }
-        
-        .message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-left: 4px solid #dc3545;
-        }
-        
-        /* 统计框 */
-        .total-box {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .total-box::before {
-            content: "💰";
-            position: absolute;
-            top: 10px;
-            left: 20px;
-            font-size: 30px;
-        }
-        
-        .total-box::after {
-            content: "💰";
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            font-size: 30px;
-        }
-        
-        .total-box .amount {
-            font-size: 2.5rem;
-            margin: 10px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        /* 空状态 */
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: #7f8c8d;
-        }
-        
-        .empty-state p {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-        
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        /* 动画效果 */
-        @keyframes float {
-            0% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-            100% {
-                transform: translateY(0px);
-            }
-        }
-        
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            header h1 {
-                font-size: 2rem;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            form {
-                grid-template-columns: 1fr;
-            }
-            
-            th, td {
-                padding: 10px;
-                font-size: 0.9rem;
-            }
-            
-            .total-box .amount {
-                font-size: 2rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            header h1 {
-                font-size: 1.8rem;
-            }
-            
-            header::before,
-            header::after {
-                font-size: 30px;
-            }
-            
-            .card h2 {
-                font-size: 1.5rem;
-            }
-            
-            .total-box {
-                padding: 20px 10px;
-            }
-            
-            .total-box .amount {
-                font-size: 1.8rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="bg-pattern"></div>
-    
-    <div class="container">
-        <header>
-            <h1>喜庆电子礼薄</h1>
-            <p>记录美好时刻，珍藏真挚情谊</p>
-        </header>
-        
-        <!-- 消息提示 -->
-        <div id="message-container"></div>
-        
-        <!-- 添加记录表单 -->
-        <div class="card">
-            <h2>添加随礼记录</h2>
-            <form id="add-record-form">
-                <div class="form-group">
-                    <label for="name">姓名 *</label>
-                    <input type="text" id="name" name="name" required placeholder="请输入送礼人姓名">
-                </div>
-                
-                <div class="form-group">
-                    <label for="amount">金额 *</label>
-                    <input type="number" id="amount" name="amount" step="0.01" min="0" required placeholder="请输入礼金金额">
-                </div>
-                
-                <div class="form-group">
-                    <label for="relation">关系</label>
-                    <input type="text" id="relation" name="relation" placeholder="如：朋友、亲戚、同事">
-                </div>
-                
-                <div class="form-group">
-                    <label for="greeting">祝福语</label>
-                    <input type="text" id="greeting" name="greeting" placeholder="如：新婚快乐、百年好合">
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="message">留言</label>
-                    <textarea id="message" name="message" rows="3" placeholder="请输入留言内容（选填）"></textarea>
-                </div>
-                
-                <button type="submit" class="btn-primary">添加记录</button>
-            </form>
-        </div>
-        
-        <!-- 记录列表 -->
-        <div class="card">
-            <h2>随礼记录</h2>
-            
-            <div class="total-box">
-                <div>总金额</div>
-                <div class="amount">¥<span id="total-amount">0.00</span></div>
-                <div>共 <span id="total-count">0</span> 位宾客</div>
-            </div>
-            
-            <div class="table-container">
-                <table id="records-table">
-                    <thead>
-                        <tr>
-                            <th>姓名</th>
-                            <th>金额</th>
-                            <th>关系</th>
-                            <th>祝福语</th>
-                            <th>记录时间</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="records-body">
-                        <!-- 记录将通过JavaScript动态生成 -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <div id="empty-state" class="empty-state">
-                <div class="empty-state-icon">📝</div>
-                <p>暂无随礼记录</p>
-                <p>开始添加第一条记录吧！</p>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        // 示例数据
-        const sampleRecords = [
-            { id: 1, name: '张三', amount: 200.00, relation: '朋友', greeting: '新婚快乐！', message: '', created_at: '2024-01-15 10:30:00' },
-            { id: 2, name: '李四', amount: 500.00, relation: '亲戚', greeting: '百年好合', message: '祝你们永远幸福！', created_at: '2024-01-15 11:45:00' },
-            { id: 3, name: '王五', amount: 300.00, relation: '同事', greeting: '早生贵子', message: '', created_at: '2024-01-15 14:20:00' }
-        ];
-        
-        // 初始化数据
-        document.addEventListener('DOMContentLoaded', function() {
-            // 检查localStorage是否有数据，如果没有则使用示例数据
-            if (!localStorage.getItem('giftRecords')) {
-                localStorage.setItem('giftRecords', JSON.stringify(sampleRecords));
-            }
-            
-            // 加载记录
-            loadRecords();
-            
-            // 表单提交事件
-            document.getElementById('add-record-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                addRecord();
-            });
-        });
-        
-        // 加载记录
-        function loadRecords() {
-            const records = JSON.parse(localStorage.getItem('giftRecords') || '[]');
-            const recordsBody = document.getElementById('records-body');
-            const emptyState = document.getElementById('empty-state');
-            const totalAmountEl = document.getElementById('total-amount');
-            const totalCountEl = document.getElementById('total-count');
-            
-            // 清空表格
-            recordsBody.innerHTML = '';
-            
-            if (records.length > 0) {
-                // 隐藏空状态
-                emptyState.style.display = 'none';
-                
-                // 计算总金额
-                const totalAmount = records.reduce((sum, record) => sum + parseFloat(record.amount), 0);
-                totalAmountEl.textContent = totalAmount.toFixed(2);
-                totalCountEl.textContent = records.length;
-                
-                // 按时间降序排序
-                records.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                
-                // 添加记录到表格
-                records.forEach(record => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${record.name}</td>
-                        <td>¥${parseFloat(record.amount).toFixed(2)}</td>
-                        <td>${record.relation || '-'}</td>
-                        <td>${record.greeting || '-'}</td>
-                        <td>${record.created_at}</td>
-                        <td>
-                            <button class="btn btn-danger" onclick="deleteRecord(${record.id})">删除</button>
-                        </td>
-                    `;
-                    recordsBody.appendChild(row);
-                });
-            } else {
-                // 显示空状态
-                emptyState.style.display = 'block';
-                totalAmountEl.textContent = '0.00';
-                totalCountEl.textContent = '0';
-            }
-        }
-        
-        // 添加记录
-        function addRecord() {
-            const name = document.getElementById('name').value.trim();
-            const amount = document.getElementById('amount').value;
-            const relation = document.getElementById('relation').value.trim();
-            const greeting = document.getElementById('greeting').value.trim();
-            const message = document.getElementById('message').value.trim();
-            
-            if (!name || !amount) {
-                showMessage('请填写姓名和金额', 'error');
-                return;
-            }
-            
-            const records = JSON.parse(localStorage.getItem('giftRecords') || '[]');
-            
-            // 创建新记录
-            const newRecord = {
-                id: Date.now(), // 使用时间戳作为ID
-                name: name,
-                amount: parseFloat(amount),
-                relation: relation,
-                greeting: greeting,
-                message: message,
-                created_at: new Date().toLocaleString('zh-CN')
-            };
-            
-            // 添加到数组
-            records.push(newRecord);
-            
-            // 保存到localStorage
-            localStorage.setItem('giftRecords', JSON.stringify(records));
-            
-            // 重置表单
-            document.getElementById('add-record-form').reset();
-            
-            // 重新加载记录
-            loadRecords();
-            
-            // 显示成功消息
-            showMessage('记录添加成功！', 'success');
-        }
-        
-        // 删除记录
-        function deleteRecord(id) {
-            if (confirm('确定要删除这条记录吗？')) {
-                const records = JSON.parse(localStorage.getItem('giftRecords') || '[]');
-                const updatedRecords = records.filter(record => record.id !== id);
-                
-                // 保存更新后的记录
-                localStorage.setItem('giftRecords', JSON.stringify(updatedRecords));
-                
-                // 重新加载记录
-                loadRecords();
-                
-                // 显示成功消息
-                showMessage('记录删除成功！', 'success');
-            }
-        }
-        
-        // 显示消息
-        function showMessage(text, type) {
-            const messageContainer = document.getElementById('message-container');
-            const message = document.createElement('div');
-            
-            message.className = `message ${type}`;
-            message.textContent = text;
-            
-            // 清空容器并添加新消息
-            messageContainer.innerHTML = '';
-            messageContainer.appendChild(message);
-            
-            // 3秒后移除消息
-            setTimeout(() => {
-                message.style.opacity = '0';
-                message.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => {
-                    messageContainer.removeChild(message);
-                }, 500);
-            }, 3000);
-        }
-    </script>
-</body>
-</html>
+      :root,
+      .theme-festive {
+        --primary-color: #c00;
+        --primary-color-hover: #a00;
+        --primary-text-color: #c00;
+        --primary-bg-light: #fff2f2;
+        --primary-border-color: #ffaaaa;
+        --primary-ring-color: #ef4444;
+        /* red-500 */
+        --header-text-color: #b91c1c;
+        /* red-700 */
+        --button-bg-color: #dc2626;
+        /* red-600 */
+        --button-bg-hover: #b91c1c;
+        /* red-700 */
+        --button-border-color: #dc2626;
+        /* red-600 */
+        --button-text-color: #dc2626;
+        /* red-600 */
+        --link-hover-bg: #fee2e2;
+        /* red-100 */
+        --total-text-color: #ef4444;
+        /* red-500 */
+      }
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>电子礼薄</title>
-    <style>
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+      .theme-solemn {
+        --primary-color: #374151;
+        /* gray-700 */
+        --primary-color-hover: #1f2937;
+        /* gray-800 */
+        --primary-text-color: #111827;
+        /* gray-900 */
+        --primary-bg-light: #f3f4f6;
+        /* gray-100 */
+        --primary-border-color: #d1d5db;
+        /* gray-300 */
+        --primary-ring-color: #4b5563;
+        /* gray-600 */
+        --header-text-color: #1f2937;
+        /* gray-800 */
+        --button-bg-color: #4b5563;
+        /* gray-600 */
+        --button-bg-hover: #374151;
+        /* gray-700 */
+        --button-border-color: #4b5563;
+        /* gray-600 */
+        --button-text-color: #4b5563;
+        /* gray-600 */
+        --link-hover-bg: #e5e7eb;
+        /* gray-200 */
+        --total-text-color: #374151;
+        /* gray-700 */
+      }
+
+      body {
+        font-family: "Inter", "Microsoft YaHei", sans-serif;
+      }
+
+      .gift-book-frame {
+        border: 4px solid var(--primary-color);
+        padding: 22px;
+        border-radius: 10px;
+        background-color: var(--primary-bg-light);
+        position: relative;
+        background-size: 15px 15px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        cursor: default;
+        min-height: 450px;
+      }
+
+      #gift-book-content,
+      .print-book-content {
+        display: flex;
+        flex-direction: column;
+        border-top: 2px solid var(--primary-border-color);
+        flex: 1;
+      }
+
+      .gift-book-row {
+        display: flex;
+        width: 100%;
+        flex: 3;
+      }
+
+      .gift-book-row > .book-cell {
+        flex: 1;
+        min-width: 0;
+        position: relative;
+        line-height: 1.2;
+      }
+
+      .book-cell {
+        border-right: 2px solid var(--primary-border-color);
+        border-bottom: 2px solid var(--primary-border-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        writing-mode: vertical-lr;
+        text-orientation: mixed;
+        font-weight: bold;
+        font-size: clamp(16px, 1.6vw, 25px);
+        letter-spacing: 7px;
+        font-family: "KaiTi";
+        padding: 10px 0;
+        max-height: 100%;
+        overflow: hidden;
+        max-height: 400px;
+      }
+
+      .book-cell:first-child {
+        border-left: 2px solid var(--primary-border-color);
+      }
+
+      .name-cell:hover {
+        background-color: var(--link-hover-bg);
+      }
+
+      .name-cell .name {
+        color: #333;
+        padding: 15px 0;
+        cursor: pointer;
+        flex: 5;
+        text-align: center;
+        white-space: nowrap;
+        min-height: 8em;
+      }
+
+      .type-cell {
+        color: var(--primary-color);
+        font-size: clamp(16px, 1.6vw, 22px);
+        padding: 10px 4px;
+        font-family: SimSun, "宋体", NSimSun, serif;
+        font-weight: bold;
+      }
+
+      .amount-cell {
+        color: #333;
+        justify-content: space-around;
+        cursor: pointer;
+      }
+
+      .amount-chinese {
+        letter-spacing: 1.5px;
+        flex: 6;
+        text-align: center;
+        padding: 15px 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .amount-numeric,
+      .mark {
+        color: #555;
+        letter-spacing: 1px;
+        writing-mode: lr;
+        line-height: 3;
+        font-size: clamp(10px, 1.3vw, 14px);
+        flex: 1;
+      }
+
+      .mark {
+        color: var(--primary-color);
+        white-space: nowrap;
+        line-height: 1.2;
+        height: 2.5em;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: absolute;
+        bottom: 1vw;
+      }
+      .themed-edit-area {
+        background-color: var(--primary-bg-light);
+        border: 1px solid var(--primary-border-color);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        width: 100%;
+      }
+
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+
+      .themed-header {
+        color: var(--header-text-color);
+      }
+
+      .themed-button-primary {
+        background-color: var(--button-bg-color);
+        color: white;
+      }
+
+      .themed-button-primary:hover {
+        background-color: var(--button-bg-hover);
+      }
+
+      .themed-button-secondary {
+        border-color: var(--button-border-color);
+        color: var(--button-text-color);
+      }
+
+      .themed-button-secondary:hover {
+        background-color: var(--link-hover-bg);
+      }
+
+      .themed-ring:focus {
+        --tw-ring-color: var(--primary-ring-color) !important;
+      }
+
+      .themed-text-radio {
+        color: var(--button-text-color);
+      }
+
+      .themed-peer-checked {
+        --tw-bg-opacity: 1;
+        background-color: var(--button-bg-color);
+      }
+
+      .themed-text {
+        color: var(--total-text-color);
+      }
+
+      .themed-link-hover:hover {
+        background-color: var(--link-hover-bg);
+      }
+
+      .themed-dropdown-text {
+        color: var(--primary-text-color);
+      }
+
+      .themed-dropdown-text:hover {
+        color: var(--primary-color-hover);
+      }
+
+      .peer:checked ~ .toggle-bg {
+        background-color: var(--button-bg-color);
+      }
+      body.printing #app-container {
+        display: none;
+      }
+      #modal.modal-large {
+        max-width: 1200px;
+        width: 95vw;
+      }
+      .gridjs-wrapper {
+        overflow-x: hidden;
+      }
+      td.gridjs-td,
+      th.gridjs-th {
+        padding: 6px;
+      }
+      @media (max-width: 700px) {
+        .amount-numeric,
+        .mark {
+          position: relative;
+          writing-mode: tb;
         }
-        h1, h2 {
-            color: #333;
+        .gridjs-wrapper {
+          overflow-x: auto;
+          height: 30vh !important;
         }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+      }
+      @media print {
+        @page {
+          size: 29.7cm 21cm;
+          margin: 0;
         }
-        form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+
+        body * {
+          visibility: hidden;
+          background-color: var(--primary-bg-light);
         }
-        form h2 {
-            grid-column: 1 / -1;
+
+        #print-view,
+        #print-view * {
+          visibility: visible;
         }
-        .form-group {
-            display: flex;
-            flex-direction: column;
+
+        #print-view {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
         }
-        .form-group.full-width {
-            grid-column: 1 / -1;
+
+        .print-page {
+          page-break-after: always;
+          width: 100%;
+          height: 100%;
+          padding: 15mm;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          background: url("./static/bg.webp") center/contain no-repeat, var(--primary-bg-light);
+          overflow: hidden;
         }
-        label {
-            margin-bottom: 5px;
-            font-weight: bold;
+
+        .print-cover-page {
+          padding: 0;
+          background: none; /* Override default page background for cover */
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
         }
-        input, textarea, button {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        .print-cover-page img {
+          object-fit: cover;
+          width: 100%;
+          height: 100%;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            grid-column: 1 / -1;
+        /* --- End NEW --- */
+
+        .print-header {
+          text-align: center;
+          margin-bottom: 20px;
+          color: var(--primary-color);
+          font-family: "KaiTi";
+          font-weight: bold;
+          font-size: 38px;
         }
-        button:hover {
-            background-color: #45a049;
+
+        .print-footer {
+          flex-shrink: 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          font-size: 14px;
+          padding: 10px 25px 0;
+          margin-top: auto;
+          font-family: "KaiTi";
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+
+        .print-footer p {
+          margin: 3px 0;
         }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+
+        .print-footer-totals {
+          text-align: right;
         }
-        th {
-            background-color: #f2f2f2;
+
+        .print-footer .total-amount-print {
+          font-weight: bold;
+          font-size: 16px;
         }
-        tr:hover {
-            background-color: #f5f5f5;
+        .print-footer-totals .total-amount-print:not(:last-child) {
+          margin-right: 25px;
         }
-        .actions {
-            display: flex;
-            gap: 10px;
+        .print-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
         }
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
+        .print-page-number {
+          text-align: center;
+          flex-grow: 1;
         }
-        .delete-btn:hover {
-            background-color: #da190b;
+        .print-appendix-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+          font-size: 14px;
+          text-align: center;
         }
-        .message {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
+        .print-appendix-table th,
+        .print-appendix-table td {
+          border: 1px solid var(--primary-border-color);
+          padding: 8px;
+          text-align: left;
+          word-break: break-word;
+          font-family: "KaiTi";
+          font-weight: bold;
+          font-size: 18px;
+          letter-spacing: 2px;
+          text-align: center;
         }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .print-appendix-table th {
+          background-color: var(--link-hover-bg);
+          font-weight: bold;
         }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .print-appendix-table th:nth-child(3) {
+          width: 60%;
         }
-        .total-box {
-            background-color: #e7f3ff;
-            padding: 15px;
-            border-radius: 4px;
-            text-align: right;
-            font-size: 18px;
-            font-weight: bold;
+        .amount-numeric {
+          display: block;
         }
-        @media (max-width: 600px) {
-            form {
-                grid-template-columns: 1fr;
-            }
-            table {
-                font-size: 14px;
-            }
-            th, td {
-                padding: 8px;
-            }
+        .book-cell {
+          font-size: 18pt !important;
         }
+        .name-cell .name {
+          padding: 0;
+        }
+        .name-cell:hover {
+          background-color: transparent;
+        }
+        .book-cell:not(.type-cell) {
+          font-family: "KaiTi";
+        }
+        .theme-solemn #print-view {
+          filter: grayscale(100%);
+        }
+        .mark {
+          display: none;
+        }
+        .print-book-content .gift-book-row:nth-child(3) {
+          max-height: 82mm;
+        }
+      }
+      .amount-chinese.scale,
+      .name.scale {
+        font-size: 14pt;
+        letter-spacing: -2px;
+        padding: 5px 0;
+      }
+      .amount-numeric.scale {
+        letter-spacing: 0.5px;
+        writing-mode: tb-rl;
+      }
     </style>
-</head>
-<body>
-    <h1>电子礼薄</h1>
-    
-    <!-- 消息提示 -->
-    <?php if (isset($success_msg)): ?>
-        <div class="message success"><?php echo $success_msg; ?></div>
-    <?php endif; ?>
-    <?php if (isset($error_msg)): ?>
-        <div class="message error"><?php echo $error_msg; ?></div>
-    <?php endif; ?>
-    
-    <!-- 添加记录表单 -->
-    <div class="container">
-        <form method="post" action="">
-            <h2>添加随礼记录</h2>
-            
-            <div class="form-group">
-                <label for="name">姓名 *</label>
-                <input type="text" id="name" name="name" required>
+  </head>
+
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen theme-festive">
+    <div id="app-container" class="w-full max-w-7xl mx-auto p-4">
+      <!-- 创建/选择事项界面 -->
+      <div id="setup-screen" class="bg-white p-8 rounded-lg shadow-xl max-w-2xl mx-auto hidden">
+        <h1 class="text-3xl font-bold text-center themed-header mb-6">电子礼簿系统</h1>
+        <div id="select-event-section" class="mb-8 hidden">
+          <h2 class="text-xl font-semibold mb-4 border-b pb-2">选择事项</h2>
+          <div class="flex items-center space-x-4">
+            <select id="event-selector" class="flex-1 p-3 border rounded-lg focus:ring-2 themed-ring">
+              <option value="">请选择一个事项</option>
+            </select>
+            <button id="unlock-event-btn" class="themed-button-primary px-6 py-3 rounded-lg transition duration-300">进入</button>
+          </div>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold mb-4 border-b pb-2">或 创建新事项</h2>
+          <form id="create-event-form" class="space-y-4">
+            <input type="text" id="event-name" placeholder="事项名称 (例如: 张三李四新婚之喜)" required class="w-full p-3 border rounded-lg focus:ring-2 themed-ring" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">开始时间</label>
+                <div class="flex gap-2">
+                  <input type="date" id="start-date" required class="w-full p-3 border rounded-lg focus:ring-2 themed-ring" />
+                  <input type="time" id="start-time" required class="w-full p-3 border rounded-lg focus:ring-2 themed-ring" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">结束时间</label>
+                <div class="flex gap-2">
+                  <input type="date" id="end-date" required class="w-full p-3 border rounded-lg focus:ring-2 themed-ring" />
+                  <input type="time" id="end-time" required class="w-full p-3 border rounded-lg focus:ring-2 themed-ring" />
+                </div>
+              </div>
             </div>
-            
-            <div class="form-group">
-                <label for="amount">金额 *</label>
-                <input type="number" id="amount" name="amount" step="0.01" min="0" required>
+            <input type="text" id="admin-password" placeholder="设置管理密码 (请牢记)" required class="w-full p-3 border rounded-lg focus:ring-2 themed-ring" />
+
+            <details class="group">
+              <summary class="cursor-pointer text-sm font-medium text-gray-600 group-hover:text-gray-900 list-none">
+                <div class="flex items-center">
+                  <span>更多设置</span>
+                  <i class="ri-arrow-down-s-line text-lg ml-1 transition-transform transform group-open:rotate-180"></i>
+                </div>
+              </summary>
+              <div class="mt-4 p-4 bg-gray-50 rounded-lg border">
+                <div>
+                  <label for="event-theme" class="block text-sm font-medium text-gray-700">界面风格</label>
+                  <select id="event-theme" class="mt-1 w-full p-3 border rounded-lg focus:ring-2 themed-ring">
+                    <option value="theme-festive" selected>喜庆红 (喜事)</option>
+                    <option value="theme-solemn">肃穆灰 (白事)</option>
+                  </select>
+                  <p class="text-xs text-gray-500 mt-2">为不同性质的事项选择合适的界面配色风格。</p>
+                </div>
+                <div class="mt-4">
+                  <label for="cover-image-upload" class="block text-sm font-medium text-gray-700">礼簿(打印/导出PDF)封面图 (可选)</label>
+                  <input
+                    type="file"
+                    id="cover-image-upload"
+                    accept="image/*"
+                    class="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
+                  />
+                  <img id="cover-preview" src="" alt="封面预览" class="mt-2 rounded-lg hidden max-w-full h-auto" />
+                  <p class="text-xs text-gray-500 mt-2">尺寸建议595 x 842px, 格式jpg/PNG, 大小不超过2M。</p>
+                </div>
+
+                <div class="mt-4">
+                  <label for="event-voice" class="block text-sm font-medium text-gray-700">语音播报音色</label>
+                  <div class="flex items-center gap-2 mt-1">
+                    <select id="event-voice" class="text-sm flex-grow w-full p-3 border rounded-lg focus:ring-2 themed-ring">
+                      <option value="">默认音色</option>
+                    </select>
+                    <button type="button" id="preview-create-voice-btn" class="themed-button-secondary border p-3 rounded-lg whitespace-nowrap">预览</button>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-2">选择一个喜欢的播报声音。可选项取决于您当前使用的浏览器和操作系统。</p>
+                </div>
+              </div>
+            </details>
+
+            <button type="submit" class="w-full themed-button-primary p-3 rounded-lg transition duration-300 font-bold">创建并进入</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- 礼簿主界面 -->
+      <div id="main-screen" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-4">
+            <div class="relative">
+              <div id="event-switcher-trigger" class="flex items-center gap-2 cursor-pointer group">
+                <h1 id="current-event-title" class="text-3xl font-bold themed-dropdown-text"></h1>
+                <i class="ri-arrow-down-s-line text-2xl themed-dropdown-text"></i>
+              </div>
+              <div id="event-dropdown" class="absolute top-full left-0 mt-2 w-72 bg-white rounded-md shadow-lg z-10 hidden"></div>
             </div>
-            
-            <div class="form-group">
-                <label for="relation">关系</label>
-                <input type="text" id="relation" name="relation">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- 左侧录入区 -->
+          <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-center border-b pb-2">礼金录入</h2>
+            <form id="add-gift-form" class="space-y-4">
+              <input type="text" id="guest-name" placeholder="姓名" required class="w-full p-3 border rounded-lg focus:ring-2 themed-ring" />
+              <input type="number" id="gift-amount" placeholder="金额 (元)" required min="0" max="999999999999" step="0.01" class="w-full p-3 border rounded-lg focus:ring-2 themed-ring" />
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">收款类型</label>
+                <div class="flex flex-wrap gap-x-4 gap-y-2">
+                  <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="payment-type" value="现金" class="themed-text-radio themed-ring" checked /><span>现金</span></label>
+                  <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="payment-type" value="支付宝" class="themed-text-radio themed-ring" /><span>支付宝</span></label>
+                  <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="payment-type" value="微信" class="themed-text-radio themed-ring" /><span>微信</span></label>
+                  <label class="flex items-center space-x-2 cursor-pointer"><input type="radio" name="payment-type" value="其他" class="themed-text-radio themed-ring" /><span>其他</span></label>
+                </div>
+              </div>
+              <textarea id="remarks" placeholder="备注 (选填)" rows="3" class="w-full p-3 border rounded-lg focus:ring-2 themed-ring"></textarea>
+              <button id="submit-gift-btn" type="submit" class="w-full themed-button-primary font-bold p-4 rounded-lg transition duration-300 text-lg">确认录入</button>
+            </form>
+            <div class="mt-6 pt-6 border-t">
+              <h3 class="text-xl font-semibold mb-3">功能区</h3>
+              <div class="space-y-3">
+                <div class="relative">
+                  <input type="text" id="search-name" placeholder="按姓名查找..." class="w-full p-3 border rounded-lg focus:ring-2 themed-ring pr-10" />
+                  <i id="search-icon" class="ri-search-line text-xl absolute right-3 top-3 text-gray-400 cursor-pointer"></i>
+                </div>
+                <button id="print-btn" class="w-full themed-button-primary p-3 rounded-lg">打印/另存为PDF</button>
+                <button id="export-excel-btn" class="w-full border themed-button-secondary p-3 rounded-lg">导出为 Excel</button>
+                <button id="stats-btn" class="w-full themed-button-primary p-3 rounded-lg">查看统计</button>
+                <div class="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
+                  <span class="font-medium text-gray-700">语音播报</span>
+                  <label for="speech-toggle" class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="speech-toggle" class="sr-only peer" checked />
+                    <div
+                      class="toggle-bg w-11 h-6 themed-button-secondary border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                    ></div>
+                  </label>
+                </div>
+              </div>
             </div>
-            
-            <div class="form-group full-width">
-                <label for="message">留言</label>
-                <textarea id="message" name="message" rows="3"></textarea>
+          </div>
+          <!-- 右侧展示区 -->
+          <div class="lg:col-span-2">
+            <div id="book-container-wrapper" class="gift-book-frame">
+              <div id="book-footer" class="flex justify-between items-center mb-4 flex-wrap gap-y-2">
+                <div class="flex items-center flex-wrap gap-x-4">
+                  <div><span class="font-bold text-md">本页小计:</span> <span id="page-subtotal" class="text-xl font-bold themed-text">¥0.00</span></div>
+                  <div><span class="font-bold text-md">总金额:</span> <span id="total-amount" class="text-xl font-bold themed-text">¥0.00</span></div>
+                  <div><span class="font-bold text-md">总人数:</span> <span id="total-givers" class="text-xl font-bold themed-text">0</span></div>
+                </div>
+                <div class="flex items-center space-x-2 text-lg">
+                  <button id="prev-page-btn" class="themed-button-primary p-2 disabled:bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center"><i class="ri-arrow-left-s-line"></i></button>
+                  <div id="page-info" class="font-bold flex items-center">第 1 / 1 页</div>
+                  <button id="next-page-btn" class="themed-button-primary p-2 disabled:bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center"><i class="ri-arrow-right-s-line"></i></button>
+                </div>
+              </div>
+              <div id="gift-book-content"></div>
             </div>
-            
-            <button type="submit" name="add_record">添加记录</button>
-        </form>
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <!-- 记录列表 -->
-    <div class="container">
-        <h2>随礼记录</h2>
-        
-        <div class="total-box">
-            总金额: ¥<?php echo number_format($total_amount, 2); ?>
+    <button id="fullscreen-btn" class="fixed top-5 right-5" title="全屏/退出全屏">
+      <i id="fullscreen-icon" class="ri-fullscreen-line text-2xl themed-text themed-dropdown-text"></i>
+    </button>
+    <!-- 模态框/弹窗 -->
+    <div id="modal-container" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+      <div id="modal" class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+        <h3 id="modal-title" class="text-xl font-bold mb-4 text-center"></h3>
+        <div id="modal-content"></div>
+        <div id="modal-actions" class="mt-6 flex justify-end space-x-3"></div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- 常量定义 ---
+        const ITEMS_PER_PAGE = 12; // 礼簿每页显示的条目数
+        const MAX_COVER_IMAGE_SIZE = 2 * 1024 * 1024; // 礼簿封面图最大体积 (2MB)
+        const PRINT_SPLIT_THRESHOLD = 1008; //pdf导出打印数量
+
+        // --- DOM 元素引用 ---
+        const dom = {
+          setupScreen: document.getElementById("setup-screen"),
+          mainScreen: document.getElementById("main-screen"),
+          eventSelector: document.getElementById("event-selector"),
+          unlockEventBtn: document.getElementById("unlock-event-btn"),
+          createEventForm: document.getElementById("create-event-form"),
+          addGiftForm: document.getElementById("add-gift-form"),
+          giftBookContent: document.getElementById("gift-book-content"),
+          totalAmountEl: document.getElementById("total-amount"),
+          pageSubtotalEl: document.getElementById("page-subtotal"),
+          totalGiversEl: document.getElementById("total-givers"),
+          pageInfoEl: document.getElementById("page-info"),
+          prevPageBtn: document.getElementById("prev-page-btn"),
+          nextPageBtn: document.getElementById("next-page-btn"),
+          currentEventTitleEl: document.getElementById("current-event-title"),
+          eventSwitcherTrigger: document.getElementById("event-switcher-trigger"),
+          eventDropdown: document.getElementById("event-dropdown"),
+          printBtn: document.getElementById("print-btn"),
+          exportExcelBtn: document.getElementById("export-excel-btn"),
+          statsBtn: document.getElementById("stats-btn"),
+          searchNameInput: document.getElementById("search-name"),
+          searchIcon: document.getElementById("search-icon"),
+          selectEventSection: document.getElementById("select-event-section"),
+          speechToggle: document.getElementById("speech-toggle"),
+          modalContainer: document.getElementById("modal-container"),
+          modal: document.getElementById("modal"),
+          modalTitle: document.getElementById("modal-title"),
+          modalContent: document.getElementById("modal-content"),
+          modalActions: document.getElementById("modal-actions"),
+          guestNameInput: document.getElementById("guest-name"),
+          giftAmountInput: document.getElementById("gift-amount"),
+          remarksInput: document.getElementById("remarks"),
+          eventNameInput: document.getElementById("event-name"),
+          startDateInput: document.getElementById("start-date"),
+          startTimeInput: document.getElementById("start-time"),
+          endDateInput: document.getElementById("end-date"),
+          endTimeInput: document.getElementById("end-time"),
+          adminPasswordInput: document.getElementById("admin-password"),
+          eventThemeSelect: document.getElementById("event-theme"),
+          coverImageUpload: document.getElementById("cover-image-upload"),
+          coverPreview: document.getElementById("cover-preview"),
+          eventVoiceSelect: document.getElementById("event-voice"),
+          previewCreateVoiceBtn: document.getElementById("preview-create-voice-btn"),
+          fullscreenBtn: document.getElementById("fullscreen-btn"),
+          fullscreenIcon: document.getElementById("fullscreen-icon"),
+        };
+
+        // --- 应用状态管理 ---
+        let db; // IndexedDB 数据库实例
+        let currentEvent = null; // 当前活动的事项
+        let currentPassword = null; // 当前事项的解密密码
+        let gifts = []; // 当前事项的所有礼金记录
+        let currentPage = 1; // 当前礼簿页码
+        let isSpeechEnabled = true; // 是否开启语音播报
+
+        // --- 数据库与加密 ---
+
+        /**
+         * 初始化 IndexedDB 数据库。
+         * 数据库名: GiftRegistryDB, 版本: 1
+         * 包含两个对象仓库: 'events' (存储事项信息) 和 'gifts' (存储礼金记录)
+         */
+        function initDB() {
+          try {
+            const request = indexedDB.open("GiftRegistryDB", 1);
+
+            request.onerror = (event) => {
+              console.error("数据库打开失败:", event.target.errorCode);
+              showAlert("严重错误", "无法访问浏览器数据库。这可能是由于您使用了隐私浏览模式或禁用了相关功能。应用无法正常运行。");
+            };
+
+            request.onsuccess = (event) => {
+              db = event.target.result;
+              // 尝试从 sessionStorage 恢复会话，避免用户刷新后需要重新输入密码
+              if (!tryRestoreSession()) {
+                loadEvents();
+                showSetupScreen();
+              }
+            };
+
+            request.onupgradeneeded = (event) => {
+              const db = event.target.result;
+              db.createObjectStore("events", { keyPath: "id", autoIncrement: true });
+              const giftStore = db.createObjectStore("gifts", { keyPath: "id", autoIncrement: true });
+              // 为 'gifts' 创建索引，方便按事项ID查询
+              giftStore.createIndex("eventId", "eventId", { unique: false });
+            };
+          } catch (e) {
+            console.error("IndexedDB 初始化失败:", e);
+            showAlert("严重错误", "您的浏览器不支持或已禁用 IndexedDB，本应用无法运行。");
+          }
+        }
+
+        /**
+         * 将 IndexedDB 的请求对象转换为 Promise，简化异步操作。
+         * @param {IDBRequest} request - IndexedDB 请求对象。
+         * @returns {Promise<any>}
+         */
+        function promisifyRequest(request) {
+          return new Promise((resolve, reject) => {
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+          });
+        }
+
+        // 加密与哈希函数
+        const encryptData = (data, key) => CryptoJS.AES.encrypt(JSON.stringify(data), key).toString();
+        const decryptData = (ciphertext, key) => {
+          try {
+            const bytes = CryptoJS.AES.decrypt(ciphertext, key);
+            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+          } catch (e) {
+            console.error("解密失败:", e);
+            return null;
+          }
+        };
+        const hashPassword = (password) => CryptoJS.SHA256(password).toString();
+
+        // --- 核心业务逻辑 (会话、事项、礼金) ---
+
+        /**
+         * 尝试从 sessionStorage 恢复上一次的会话。
+         * @returns {boolean} 是否成功恢复会话。
+         */
+        function tryRestoreSession() {
+          const savedSession = sessionStorage.getItem("activeEventSession");
+          if (!savedSession) return false;
+
+          try {
+            const { event, encryptedPassword } = JSON.parse(savedSession);
+            const bytes = CryptoJS.AES.decrypt(encryptedPassword, event.passwordHash);
+            const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+
+            if (decryptedPassword) {
+              currentEvent = event;
+              currentPassword = decryptedPassword;
+              startSession();
+              return true;
+            }
+          } catch (e) {
+            console.error("会话恢复失败", e);
+            sessionStorage.removeItem("activeEventSession");
+          }
+          return false;
+        }
+
+        /**
+         * 启动一个事项会话，加载数据并显示主界面。
+         */
+        function startSession() {
+          dom.currentEventTitleEl.textContent = currentEvent.name;
+          applyTheme(currentEvent.theme);
+
+          // 将当前会话（包括加密后的密码）存入 sessionStorage
+          try {
+            const encryptedPassword = CryptoJS.AES.encrypt(currentPassword, currentEvent.passwordHash).toString();
+            sessionStorage.setItem("activeEventSession", JSON.stringify({ event: currentEvent, encryptedPassword }));
+          } catch (e) {
+            console.error("会话存储失败", e);
+          }
+
+          const endTime = new Date(currentEvent.endDateTime);
+          const now = new Date();
+          const notificationKey = `eventEndedNotif_${currentEvent.id}`;
+
+          // 检查事项是否已结束，并且在当前浏览器会话中尚未提示过
+          if (now > endTime && !sessionStorage.getItem(notificationKey)) {
+            const title = "请及时导出数据";
+            const message = `当前事项已于结束，为确保数据安全，强烈建议您尽快通过【<strong>导出为 Excel</strong>】或【<strong>打印/另存为PDF</strong>】功能，将礼金数据完整备份至您的电脑或者微信。<br>
+                         <span class="text-sm text-gray-600">原因：时间长了，浏览器存储空间可能会因系统清理、缓存清除等操作被重置，导致数据意外丢失。</span>`;
+
+            // 使用 setTimeout 确保主界面渲染完成后再弹窗
+            setTimeout(() => {
+              showAlert(title, message);
+              // 标记已提示，本次会话不再重复弹出
+              sessionStorage.setItem(notificationKey, "true");
+            }, 500);
+          }
+
+          loadGiftsForCurrentEvent();
+          showMainScreen();
+        }
+
+        /**
+         * 从数据库加载所有事项，并填充到下拉选择框中。
+         */
+        async function loadEvents() {
+          if (!db) return;
+          try {
+            const allEvents = await promisifyRequest(db.transaction("events", "readonly").objectStore("events").getAll());
+            dom.eventSelector.innerHTML = '<option value="">请选择一个事项</option>';
+
+            if (allEvents.length > 0) {
+              dom.selectEventSection.classList.remove("hidden");
+              allEvents.forEach((event) => {
+                const option = document.createElement("option");
+                option.value = event.id;
+                option.textContent = event.name;
+                dom.eventSelector.appendChild(option);
+              });
+            } else {
+              dom.selectEventSection.classList.add("hidden");
+            }
+          } catch (error) {
+            console.error("加载事项列表失败:", error);
+            showAlert("错误", "无法加载事项列表。");
+          }
+        }
+
+        /**
+         * 处理创建新事项的表单提交事件。
+         * @param {Event} e - 表单提交事件。
+         */
+        async function handleCreateEventSubmit(e) {
+          e.preventDefault();
+          const name = dom.eventNameInput.value.trim();
+          const startDateTime = `${dom.startDateInput.value}T${dom.startTimeInput.value}`;
+          const endDateTime = `${dom.endDateInput.value}T${dom.endTimeInput.value}`;
+          const password = dom.adminPasswordInput.value;
+          const theme = dom.eventThemeSelect.value;
+          const voiceName = dom.eventVoiceSelect.value;
+          const coverFile = dom.coverImageUpload.files[0];
+
+          if (!name || !password || !startDateTime || !endDateTime) return showAlert("错误", "请填写所有必填项。");
+          if (new Date(startDateTime) >= new Date(endDateTime)) return showAlert("错误", "开始时间必须早于结束时间。");
+
+          let coverImageBase64 = null;
+          if (coverFile) {
+            if (!isCoverFileSizeValid(coverFile)) return;
+            try {
+              coverImageBase64 = await readFileAsBase64(coverFile);
+            } catch (error) {
+              console.error("礼簿封面图读取失败:", error);
+              return showAlert("错误", "礼簿封面图读取失败，请尝试其他图片。");
+            }
+          }
+
+          const newEvent = { name, startDateTime, endDateTime, passwordHash: hashPassword(password), theme, voiceName, coverImage: coverImageBase64 };
+
+          try {
+            const newEventId = await promisifyRequest(db.transaction("events", "readwrite").objectStore("events").add(newEvent));
+            currentEvent = { ...newEvent, id: newEventId };
+            currentPassword = password;
+
+            dom.createEventForm.reset();
+            dom.coverPreview.classList.add("hidden");
+            dom.coverPreview.src = "";
+
+            startSession();
+          } catch (error) {
+            console.error("创建事项失败:", error);
+            showAlert("错误", "创建事项失败，请重试。");
+          }
+        }
+
+        /**
+         * 弹窗要求用户输入密码以解锁并进入选定的事项。
+         * @param {number} eventId - 事项的ID。
+         */
+        async function handleUnlockEvent(eventId) {
+          const event = await promisifyRequest(db.transaction("events", "readonly").objectStore("events").get(eventId));
+          if (!event) return;
+
+          const content = `<input type="password" id="modal-password" class="w-full p-2 border rounded themed-ring" placeholder="请输入密码">`;
+          const actions = [
+            { text: "取消", class: "themed-button-secondary border px-4 py-2 rounded" },
+            {
+              text: "确认",
+              class: "themed-button-primary px-4 py-2 rounded",
+              keepOpen: true,
+              handler: () => {
+                const passwordInput = document.getElementById("modal-password").value;
+                if (event.passwordHash === hashPassword(passwordInput)) {
+                  currentEvent = event;
+                  currentPassword = passwordInput;
+                  closeModal();
+                  startSession();
+                } else {
+                  closeModal();
+                  showAlert("错误", "密码错误！");
+                }
+              },
+            },
+          ];
+          showModal("输入管理密码", content, actions);
+          setTimeout(() => document.getElementById("modal-password")?.focus(), 50);
+        }
+
+        /**
+         * 从数据库加载当前事项的所有礼金记录。
+         */
+        async function loadGiftsForCurrentEvent() {
+          if (!db || !currentEvent) return;
+          try {
+            const transaction = db.transaction("gifts", "readonly");
+            const index = transaction.objectStore("gifts").index("eventId");
+            const encryptedGifts = await promisifyRequest(index.getAll(currentEvent.id));
+
+            // 先只存储加密数据，不立即解密 (保持不变)
+            gifts = encryptedGifts.map((g) => ({ ...g, data: null, _needsDecrypt: true }));
+
+            // --- 核心修改 START ---
+
+            // 1. 计算总页数，并将当前页设置为最后一页
+            const totalPages = Math.ceil(gifts.length / ITEMS_PER_PAGE) || 1;
+            currentPage = totalPages;
+
+            // 2. 计算最后一页的起始和结束索引
+            const lastPageStart = (currentPage - 1) * ITEMS_PER_PAGE;
+            const lastPageEnd = gifts.length; // 最后一页的结尾就是数组的结尾
+
+            // 3. 只解密最后一页的数据
+            for (let i = lastPageStart; i < lastPageEnd; i++) {
+              if (gifts[i] && gifts[i]._needsDecrypt) {
+                gifts[i].data = decryptData(gifts[i].encryptedData, currentPassword);
+                gifts[i]._needsDecrypt = false;
+              }
+            }
+
+            // --- 核心修改 END ---
+
+            render(); // 渲染最后一页
+
+            // 后台异步解密剩余数据
+            if (gifts.length > 0) {
+              // 从头开始解密，它会自动跳过已经解密的最后一页
+              requestIdleCallback(() => decryptRemainingGifts(0));
+            }
+          } catch (error) {
+            showNotification("数据加载失败!", "error");
+          }
+        }
+
+        /**
+         * 后台异步解密剩余数据
+         */
+        async function decryptRemainingGifts(startIndex) {
+          const BATCH_SIZE = 200;
+          for (let i = startIndex; i < gifts.length; i += BATCH_SIZE) {
+            const batchEnd = Math.min(i + BATCH_SIZE, gifts.length);
+            for (let j = i; j < batchEnd; j++) {
+              if (gifts[j]._needsDecrypt) {
+                gifts[j].data = decryptData(gifts[j].encryptedData, currentPassword);
+                gifts[j]._needsDecrypt = false;
+              }
+            }
+            // 让出控制权，避免阻塞UI
+            await new Promise((resolve) => requestIdleCallback(resolve));
+            updateTotals();
+          }
+        }
+
+        /**
+         * 确保当前页数据已解密
+         */
+        function ensureCurrentPageDecrypted() {
+          const start = (currentPage - 1) * ITEMS_PER_PAGE;
+          const end = Math.min(start + ITEMS_PER_PAGE, gifts.length);
+
+          for (let i = start; i < end; i++) {
+            if (gifts[i]._needsDecrypt) {
+              gifts[i].data = decryptData(gifts[i].encryptedData, currentPassword);
+              gifts[i]._needsDecrypt = false;
+            }
+          }
+        }
+
+        /**
+         * 处理新增礼金的表单提交，包含重复录入的检查逻辑。
+         * @param {Event} e - 表单提交事件。
+         */
+        async function handleAddGiftSubmit(e) {
+          e.preventDefault();
+          const name = dom.guestNameInput.value.trim();
+          const amountStr = dom.giftAmountInput.value;
+          const type = document.querySelector('input[name="payment-type"]:checked')?.value;
+          const remarks = dom.remarksInput.value.trim();
+
+          if (!name || !amountStr || !type) return showAlert("信息不完整", "请输入姓名、金额并选择收款类型。");
+
+          const amount = parseFloat(amountStr);
+          if (isNaN(amount) || amount < 0) return showAlert("金额无效", "请输入一个有效的非负金额。");
+
+          // 检查是否已存在同名或同名同金额的记录
+          const sameNameGifts = gifts.filter((g) => g.data?.name === name);
+          const exactMatchExists = sameNameGifts.some((g) => g.data?.amount === amount);
+
+          showGiftConfirmationModal(name, amount, remarks, sameNameGifts.length > 0, exactMatchExists);
+        }
+
+        /**
+         * 最终执行保存礼金记录到数据库的操作。
+         * @param {object} giftData - 包含姓名、金额、类型、备注等信息的礼金数据对象。
+         */
+        async function saveGift(giftData) {
+          const isOutOfTime = new Date() < new Date(currentEvent.startDateTime) || new Date() > new Date(currentEvent.endDateTime);
+
+          if (isOutOfTime) {
+            const authorized = await requestAdminPassword("礼金补录", "当前已超出有效录入时间,请输入管理密码进行补录。");
+            if (authorized === null) {
+              closeModal();
+              return;
+            }
+            if (!authorized) {
+              closeModal();
+              return showAlert("密码错误", "管理密码不正确,无法录入。");
+            }
+          }
+
+          try {
+            const fullGiftData = { ...giftData, timestamp: new Date().toISOString() };
+            const encryptedData = encryptData(fullGiftData, currentPassword);
+            const newGiftRecord = { eventId: currentEvent.id, encryptedData };
+            const newId = await promisifyRequest(db.transaction("gifts", "readwrite").objectStore("gifts").add(newGiftRecord));
+
+            closeModal();
+            dom.addGiftForm.reset();
+            document.querySelector('input[name="payment-type"][value="现金"]').checked = true;
+            dom.guestNameInput.focus();
+            speakGift(giftData.name, giftData.amount);
+
+            const newGiftObj = {
+              id: newId,
+              eventId: currentEvent.id,
+              encryptedData: encryptedData,
+              data: fullGiftData,
+              _needsDecrypt: false,
+            };
+            gifts.push(newGiftObj);
+
+            currentPage = Math.ceil(gifts.length / ITEMS_PER_PAGE) || 1;
+            render();
+            showNotification("录入成功!", "success");
+          } catch (error) {
+            closeModal();
+            showNotification("录入失败，请重试", "error");
+          }
+        }
+
+        /**
+         * 统一处理需要管理员权限的操作，弹窗要求输入密码。
+         * @param {string} title - 弹窗标题。
+         * @param {string} message - 弹窗提示信息。
+         * @returns {Promise<boolean>} - 密码是否正确。
+         */
+        function requestAdminPassword(title, message) {
+          return new Promise((resolve) => {
+            dom.modal.classList.remove("modal-large");
+            const content = `<p class="text-sm text-gray-600 mb-3">${message}</p>
+                       <input type="password" id="override-password" class="w-full p-2 border rounded themed-ring" placeholder="请输入管理密码">`;
+            const actions = [
+              { text: "取消", class: "themed-button-secondary border px-4 py-2 rounded", handler: () => resolve(null) },
+              {
+                text: "确认",
+                class: "themed-button-primary px-4 py-2 rounded",
+                handler: () => {
+                  const passwordInput = document.getElementById("override-password").value;
+                  resolve(hashPassword(passwordInput) === currentEvent.passwordHash);
+                },
+              },
+            ];
+            showModal(title, content, actions);
+            setTimeout(() => document.getElementById("override-password")?.focus(), 50);
+          });
+        }
+
+        // --- UI 渲染与更新 ---
+
+        /**
+         * 主渲染函数，调用各个子模块进行页面更新。
+         */
+        function render() {
+          renderGiftBook();
+          updateTotals();
+          updatePageInfo();
+        }
+
+        /**
+         * 渲染礼簿内容区域。
+         * @param {HTMLElement} container - 渲染的目标容器。
+         * @param {Array} items - 需要渲染的礼金记录数组。
+         */
+        function renderGiftBook(container = dom.giftBookContent, items = gifts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)) {
+          container.innerHTML = "";
+          const nameRow = document.createElement("div");
+          nameRow.className = "gift-book-row";
+          const typeRow = document.createElement("div");
+          typeRow.className = "gift-book-row flex-1";
+          const amountRow = document.createElement("div");
+          amountRow.className = "gift-book-row";
+
+          for (let i = 0; i < ITEMS_PER_PAGE; i++) {
+            const gift = items[i];
+            const giftIndex = (currentPage - 1) * ITEMS_PER_PAGE + i;
+
+            // 姓名栏
+            const nameCell = document.createElement("div");
+            nameCell.className = "book-cell name-cell";
+            if (gift?.data) {
+              const isModified = gift.data.history?.some((h) => h.type === "correction");
+              const isRemarks = gift.data.remarks;
+
+              let statusIndicators = `<div class="mark">
+                ${(isRemarks && "<p>*已备注</p>") || ""}
+                ${(isModified && "<p>*已修改</p>") || ""}
+              </div>`;
+
+              nameCell.innerHTML = `<div class="name${gift.data.name.length > 4 ? " scale" : ""}">${gift.data.name}</div>${statusIndicators}`;
+              nameCell.dataset.giftIndex = giftIndex;
+            }
+            nameRow.appendChild(nameCell);
+
+            // 贺礼/奠仪栏
+            const typeCell = document.createElement("div");
+            typeCell.className = "book-cell type-cell";
+            typeCell.textContent = currentEvent.theme === "theme-solemn" ? "奠 仪" : "贺 礼";
+            typeRow.appendChild(typeCell);
+
+            // 金额栏
+            const amountCell = document.createElement("div");
+            amountCell.className = "book-cell amount-cell";
+            amountCell.dataset.giftIndex = giftIndex;
+            if (gift?.data) {
+              const amountChinese = amountToChinese(gift.data.amount);
+              amountCell.innerHTML = `<div class="amount-chinese${amountChinese.length > 16 ? " scale" : ""}">${amountChinese}</div>
+                                <div class="amount-numeric${Math.abs(gift.data.amount).toString().length > 8 ? " scale" : ""}">¥${gift.data.amount}</div>`;
+            }
+            amountRow.appendChild(amountCell);
+          }
+          container.append(nameRow, typeRow, amountRow);
+        }
+
+        /**
+         * 更新页面顶部的总计、小计等信息。
+         */
+        function updateTotals() {
+          const itemsOnPage = gifts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+          const pageSubtotal = itemsOnPage.reduce((sum, gift) => sum + (gift.data?.amount || 0), 0);
+          dom.pageSubtotalEl.textContent = formatCurrency(pageSubtotal);
+
+          const stats = calculateStats();
+          dom.totalAmountEl.textContent = formatCurrency(stats.totalAmount);
+          dom.totalGiversEl.textContent = stats.totalGivers;
+        }
+
+        /**
+         * 更新分页信息和按钮状态。
+         */
+        function updatePageInfo() {
+          const totalPages = Math.ceil(gifts.length / ITEMS_PER_PAGE) || 1;
+          dom.pageInfoEl.innerHTML = `
+            第
+            <input type="number" id="current-page-input" value="${currentPage}"
+                  min="1" max="${totalPages}" 
+                  class="w-[${currentPage.toString().length}em] text-center bg-transparent themed-ring rounded border p-0 mx-2 font-bold focus:w-[4em]">
+            / ${totalPages} 页
+        `;
+          dom.prevPageBtn.disabled = currentPage === 1;
+          dom.nextPageBtn.disabled = currentPage === totalPages;
+        }
+
+        /**
+         * 处理页码输入框的变化，实现页面跳转
+         * @param {Event} e - 事件对象
+         */
+        function handlePageInputChange(e) {
+          const inputElement = e.target;
+          const targetPage = parseInt(inputElement.value, 10);
+          const totalPages = Math.ceil(gifts.length / ITEMS_PER_PAGE) || 1;
+
+          // 检查输入值是否为有效页码
+          if (!isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages) {
+            // 如果页码有效且与当前页不同，则跳转
+            if (targetPage !== currentPage) {
+              currentPage = targetPage;
+              ensureCurrentPageDecrypted(); // 确保目标页数据已解密
+              render(); // 重新渲染礼簿
+            }
+          } else {
+            // 如果输入无效，显示错误提示并恢复输入框的值
+            showNotification("请输入一个有效的页码", "error");
+            inputElement.value = currentPage; // 恢复为跳转前的页码
+          }
+        }
+        // --- 界面切换与主题 ---
+
+        function showMainScreen() {
+          dom.setupScreen.classList.add("hidden");
+          dom.mainScreen.classList.remove("hidden");
+        }
+
+        function showSetupScreen() {
+          dom.mainScreen.classList.add("hidden");
+          dom.setupScreen.classList.remove("hidden");
+          // 重置状态
+          currentEvent = null;
+          currentPassword = null;
+          gifts = [];
+          dom.eventSelector.value = "";
+          sessionStorage.removeItem("activeEventSession");
+          loadEvents();
+          applyTheme("theme-festive"); // 默认回到喜庆主题
+          setDefaultTimes();
+        }
+
+        function applyTheme(themeName) {
+          document.body.className = `bg-gray-100 flex items-center justify-center min-h-screen ${themeName || "theme-festive"}`;
+        }
+
+        // --- 模态框 (Modal) ---
+
+        /**
+         * 显示一个通用的模态框。
+         * @param {string} title - 模态框标题。
+         * @param {string} content - 模态框内容的 HTML 字符串。
+         * @param {Array<object>} actions - 包含按钮配置的数组, {text, class, handler, keepOpen}。
+         */
+        function showModal(title, content, actions = []) {
+          dom.modalTitle.innerHTML = title;
+          dom.modalContent.innerHTML = content;
+          dom.modalActions.innerHTML = "";
+
+          dom.modalActions.classList.remove("hidden");
+
+          actions.forEach((action) => {
+            const button = document.createElement("button");
+            button.textContent = action.text;
+            button.className = action.class;
+            // --- 新增修复：为按钮增加 ID，以便其他函数可以引用 ---
+            if (action.id) {
+              button.id = action.id;
+            }
+            button.onclick = () => {
+              action.handler?.();
+              if (!action.keepOpen) closeModal();
+            };
+            dom.modalActions.appendChild(button);
+          });
+          dom.modalContainer.classList.remove("hidden");
+          document.body.style.overflow = "hidden"; // 禁止背景滚动
+        }
+
+        function closeModal() {
+          dom.modalContainer.classList.add("hidden");
+          dom.modal.classList.remove("modal-large"); // 恢复默认大小
+          document.body.style.overflow = "auto"; // 恢复背景滚动
+        }
+
+        /**
+         * 显示一个提示弹窗。
+         * @param {string} title - 弹窗标题
+         * @param {string} message - 弹窗内容
+         * @param {boolean} [isError=true] - 是否为错误提示（目前仅影响样式）
+         * @param {function} [callback] - 用户点击“确定”后执行的回调函数
+         */
+        function showAlert(title, message, callback = null) {
+          showModal(title, `<p>${message}</p>`, [
+            {
+              text: "确定",
+              class: "themed-button-primary px-4 py-2 rounded",
+              handler: () => {
+                if (typeof callback === "function") callback();
+              },
+            },
+          ]);
+        }
+
+        /**
+         * 根据是否存在同名或重复记录，显示不同的确认弹窗。
+         */
+        function showGiftConfirmationModal(name, amount, remarks, nameExists, exactMatchExists) {
+          let modalTitle, modalContent;
+          dom.giftAmountInput.blur();
+          dom.remarksInput.blur();
+          if (exactMatchExists) {
+            modalTitle = "重复信息确认";
+            modalContent = `
+        <div class="space-y-3 text-left">
+          <div class="p-3 bg-red-100 border-l-4 border-red-500 text-red-800 rounded-md">
+            <strong class="font-bold">警告：</strong>
+            <p class="text-sm">系统中已存在“相同姓名”且“相同金额”的记录，为避免重复录入，请仔细核对。</p>
+          </div>
+          <p><strong>来宾姓名:</strong> <span class="text-lg">${name}</span></p>
+          <p><strong>金额:</strong> <span class="font-bold text-xl themed-text">${formatCurrency(amount)}</span></p>
+          <div>
+            <label for="modal-remarks-input" class="block text-sm font-medium text-gray-700">如非重复，建议填写备注(选填)</label>
+            <textarea id="modal-remarks-input" placeholder="建议备注宾客与东家关系或地址" class="w-full mt-1 p-2 border rounded themed-ring" rows="2">${remarks}</textarea>
+          </div>
+        </div>`;
+          } else if (nameExists) {
+            modalTitle = "同名信息确认";
+            modalContent = `
+        <div class="space-y-3 text-left">
+          <div class="p-2 bg-yellow-100 text-yellow-800 rounded-md text-sm">
+            <strong>注意：</strong>系统中已存在名为 <strong>${name}</strong> 的记录。为避免混淆，建议您添加备注。
+          </div>
+          <p><strong>来宾姓名:</strong> <span class="text-lg">${name}</span></p>
+          <p><strong>金额:</strong> <span class="font-bold text-xl themed-text">${formatCurrency(amount)}</span></p>
+          <div>
+            <label for="modal-remarks-input" class="block text-sm font-medium text-gray-700">备注 (选填)</label>
+            <textarea id="modal-remarks-input" placeholder="建议备注宾客与东家关系或地址" class="w-full mt-1 p-2 border rounded themed-ring" rows="2">${remarks}</textarea>
+          </div>
+        </div>`;
+          } else {
+            modalTitle = "请确认录入信息";
+            modalContent = `
+        <div class="space-y-3 text-left">
+          <p><strong>来宾姓名:</strong> <span class="text-lg">${name}</span></p>
+          <p><strong>数字金额:</strong> <span class="font-bold text-xl themed-text">${formatCurrency(amount)}</span></p>
+          <p><strong>大写金额:</strong> <span class="font-bold text-xl themed-text">${amountToChinese(amount)}</span></p>
+        </div>`;
+          }
+
+          const confirmationHandler = () => {
+            const finalRemarks = document.getElementById("modal-remarks-input")?.value.trim() ?? remarks;
+            const type = document.querySelector('input[name="payment-type"]:checked')?.value;
+            saveGift({ name, amount, type, remarks: finalRemarks });
+          };
+
+          showModal(modalTitle, modalContent, [
+            { text: "返回修改", class: "themed-button-secondary border px-4 py-2 rounded" },
+            { text: "确认提交", class: "themed-button-primary px-4 py-2 rounded", handler: confirmationHandler, keepOpen: true },
+          ]);
+        }
+
+        /**
+         * 显示礼金详情。根据是否有修改记录，显示简单弹窗或带时间轴的大弹窗。
+         * @param {number} giftIndex - 索引
+         */
+        function showGiftDetailsModal(giftIndex) {
+          const giftObject = gifts[giftIndex];
+          if (!giftObject) return;
+          const g = giftObject.data;
+          const hasHistory = g.history && g.history.length > 0;
+
+          // 1. 准备左侧详情区域的基础 HTML (包含纠错/修改按钮)
+          // 使用特定的 ID 标记姓名、金额、类型区域，方便后续替换为输入框
+          const detailsHtml = `
+            <div class="space-y-4 text-left h-full flex flex-col" id="current-details-container" data-gift-index="${giftIndex}">
+                <h4 class="font-bold text-lg border-b pb-2 mb-2">当前记录信息</h4>
+                
+                <div id="name-display-area" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                    <div><strong>姓名:</strong> <span class="text-lg ml-2">${g.name}</span></div>
+                    <button id="btn-correct-name" class="text-sm text-blue-600 hover:underline px-2 py-1">纠错</button>
+                </div>
+
+                <div id="amount-display-area" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                    <div>
+                        <p><strong>金额:</strong> <span class="font-bold themed-text text-lg ml-2">${formatCurrency(g.amount)}</span></p>
+                        <p class="text-sm text-gray-500 mt-1"><strong>类型:</strong> ${g.type}</p>
+                    </div>
+                    <button id="btn-modify-amount" class="text-sm text-blue-600 hover:underline px-2 py-1">修改</button>
+                </div>
+                
+                <div id="remarks-display-area" class="p-2 hover:bg-gray-50 rounded">
+                    <div class="flex justify-between items-start">
+                        <strong>备注:</strong>
+                        <button id="btn-edit-remarks" class="text-sm text-blue-600 hover:underline px-2 py-1">修改</button>
+                    </div>
+                    <p class="pl-2 mt-1 text-gray-700 bg-gray-50 p-2 rounded">${g.remarks || "（无备注）"}</p>
+                </div>
+                
+                <div class="mt-auto pt-4 text-xs text-gray-400 border-t">
+                    录入/修改时间: ${new Date(g.timestamp).toLocaleString("zh-CN")}
+                </div>
+            </div>`;
+
+          // 2. 根据是否有历史，构建弹窗内容
+          let modalContent = "";
+          if (hasHistory) {
+            dom.modal.classList.add("modal-large"); // 使用大弹窗
+            const timelineHtml = generateTimelineHTML(g.history, g); // 生成时间轴
+            modalContent = `
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-6 h-[60vh]">
+                    <div class="md:col-span-2 border-r pr-4 overflow-y-auto">${detailsHtml}</div>
+                    <div class="md:col-span-3 pl-2 overflow-y-auto bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-bold text-lg border-b pb-2 mb-4 flex justify-between items-center">
+                            <span>历史修改痕迹</span>
+                        </h4>
+                        ${timelineHtml}
+                    </div>
+                </div>`;
+          } else {
+            dom.modal.classList.remove("modal-large"); // 使用默认小弹窗
+            modalContent = detailsHtml;
+          }
+
+          // 3. 显示弹窗
+          showModal(`${g.name} 的礼金详情 ${hasHistory ? '<p class="text-sm text-orange-600 font-normal">（警告：此宾客数据存在修改，请自行验证数据真实性！）</p>' : ""}`, modalContent, [
+            { text: "关闭", class: "themed-button-secondary border px-4 py-2 rounded" },
+          ]);
+
+          // 绑定查看原始记录按钮事件 (如果有历史)
+          if (hasHistory) {
+            bindViewOriginalEvents(g.history, giftIndex);
+          }
+        }
+
+        /**
+         * 生成时间轴 HTML
+         */
+        function generateTimelineHTML(history, currentGift) {
+          // 倒序，最新的在最上面
+          const reversedHistory = [...history].reverse();
+          return `
+                <ul class="space-y-4 border-l-2 border-gray-300 ml-2">
+                    ${reversedHistory
+                      .map(
+                        (record, index) => `
+                        <li class="relative pl-6 pb-4">
+                            <div class="absolute w-3 h-3 bg-gray-400 rounded-full -left-[7px] top-1 border-2 border-white"></div>
+                            <div class="text-sm text-gray-500">${new Date(record.timestamp).toLocaleString("zh-CN")}</div>
+                            <div class="font-medium text-gray-800 mt-1">${record.changeLog}</div>
+                            ${
+                              index === reversedHistory.length - 1
+                                ? `<button class="btn-view-original mt-2 text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded text-gray-700" data-history-index="0">查看最原始记录</button>`
+                                : `<button class="btn-view-snapshot mt-2 text-xs text-blue-500 hover:underline" data-history-index="${history.length - 1 - index}">查看此版本快照</button>`
+                            }
+                        </li>
+                    `
+                      )
+                      .join("")}
+                    <!-- 当前状态标记 -->
+                    <li class="relative pl-6">
+                        <div class="absolute w-3 h-3 bg-green-500 rounded-full -left-[7px] top-1 border-2 border-white"></div>
+                        <div class="text-sm text-gray-500">当前状态 (${new Date(currentGift.timestamp).toLocaleString("zh-CN")})</div>
+                    </li>
+                </ul>
+            `;
+        }
+
+        /**
+         * 绑定查看历史快照的事件
+         * @param {Array} history - 历史记录数组
+         * @param {number} giftIndex - 当前礼金记录在全局 gifts 数组中的索引
+         */
+        function bindViewOriginalEvents(history, giftIndex) {
+          const showSnapshot = (historyIndex) => {
+            const snapshot = history[historyIndex].snapshot;
+            const content = `
+                    <div class="space-y-2 p-4 bg-gray-100 rounded text-left">
+                        <p><strong>姓名:</strong> ${snapshot.name}</p>
+                        <p><strong>金额:</strong> ${formatCurrency(snapshot.amount)} (${snapshot.type})</p>
+                        <p><strong>备注:</strong> ${snapshot.remarks || "无"}</p>
+                        <p class="text-xs text-gray-500 border-t pt-2 mt-2">此记录于 ${new Date(history[historyIndex].timestamp).toLocaleString()} 被修改存档。</p>
+                    </div>
+                `;
+
+            // --- START: 新增修复 ---
+            // 同样强制快照弹窗使用小窗口
+            dom.modal.classList.remove("modal-large");
+
+            showModal("历史记录快照", content, [
+              {
+                text: "返回详情",
+                class: "themed-button-secondary border px-4 py-2 rounded",
+                // 关键修复：handler 不再是 closeModal，而是重新调用详情页渲染函数
+                handler: () => {
+                  showGiftDetailsModal(giftIndex);
+                },
+                keepOpen: true, // 告诉 showModal 不要自动关闭
+              },
+            ]);
+            // --- END: 新增修复 ---
+          };
+
+          document.querySelectorAll(".btn-view-original, .btn-view-snapshot").forEach((btn) => {
+            btn.onclick = (e) => showSnapshot(parseInt(e.target.dataset.historyIndex));
+          });
+        }
+
+        /**
+         * 激活内联修改模式 (将显示区域替换为输入框和保存/取消按钮)
+         * @param {number} giftIndex
+         * @param {'name'|'amount'|'remarks'} fieldType - 要修改的字段类型
+         */
+
+        function enableInlineEdit(giftIndex, fieldType) {
+          const g = gifts[giftIndex].data;
+          let targetAreaId, editHtml, saveHandler;
+
+          // 禁用其他修改按钮，防止并发修改
+          const allButtons = ["btn-correct-name", "btn-modify-amount", "btn-edit-remarks"];
+          allButtons.forEach((btnId) => {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+              btn.disabled = true;
+              btn.classList.add("opacity-50", "cursor-not-allowed");
+            }
+          });
+
+          // 通用的取消操作：重新渲染详情弹窗，所有状态都会恢复
+          const cancelHandler = () => showGiftDetailsModal(giftIndex);
+
+          const cancelBtnHtml = `<button id="inline-cancel" class="text-sm px-3 py-1 rounded themed-button-secondary border">取消</button>`;
+          const saveBtnHtml = `<button id="inline-save" class="text-sm px-3 py-1 rounded themed-button-primary">保存</button>`;
+
+          // 根据修改类型，定义HTML和保存逻辑
+          if (fieldType === "name") {
+            targetAreaId = "name-display-area";
+            editHtml = `
+            <div class="themed-edit-area">
+                <label>纠错姓名</label>
+                <input type="text" id="inline-edit-name" value="${g.name}" class="w-full p-2 border rounded themed-ring mb-2">
+                <div class="flex justify-end space-x-2">${cancelBtnHtml}${saveBtnHtml}</div>
+            </div>`;
+            saveHandler = async () => {
+              const newName = document.getElementById("inline-edit-name").value.trim();
+              if (!newName || newName === g.name) return cancelHandler(); // 无变化或为空则取消
+              const changeLog = `将姓名由 “${g.name}” 更正为 “${newName}”`;
+
+              // <-- MODIFIED CALL: 调用新的 performUpdate 函数 -->
+              await performUpdate(giftIndex, { name: newName }, changeLog, "correction");
+            };
+          } else if (fieldType === "amount") {
+            targetAreaId = "amount-display-area";
+            editHtml = `
+            <div class="themed-edit-area">
+                <label>修改金额与类型</label>
+                <input type="number" id="inline-edit-amount" value="${g.amount}" min="0" step="0.01" class="w-full p-2 border rounded themed-ring mb-2">
+                <div class="flex flex-wrap gap-x-3 gap-y-1 mb-2">
+                    ${["现金", "支付宝", "微信", "其他"]
+                      .map(
+                        (type) => `
+                        <label class="flex items-center text-sm font-normal"><input type="radio" name="inline-edit-type" value="${type}" ${g.type === type ? "checked" : ""} class="mr-1 themed-ring">${type}</label>
+                    `
+                      )
+                      .join("")}
+                </div>
+                <div class="flex justify-end space-x-2">${cancelBtnHtml}${saveBtnHtml}</div>
+            </div>`;
+            saveHandler = async () => {
+              const newAmount = parseFloat(document.getElementById("inline-edit-amount").value);
+              const newType = document.querySelector('input[name="inline-edit-type"]:checked').value;
+              if (isNaN(newAmount) || newAmount < 0) return showAlert("错误", "请输入有效金额");
+
+              if (newAmount === g.amount && newType === g.type) return cancelHandler(); // 无变化则取消
+
+              let logs = [];
+              if (newAmount !== g.amount) logs.push(`将金额由 ${g.amount} 修改为 ${newAmount}`);
+              if (newType !== g.type) logs.push(`将类型由 ${g.type} 修改为 ${newType}`);
+
+              // <-- MODIFIED CALL: 调用新的 performUpdate 函数 -->
+              await performUpdate(giftIndex, { amount: newAmount, type: newType }, logs.join("，"), "correction");
+            };
+          } else if (fieldType === "remarks") {
+            targetAreaId = "remarks-display-area";
+            editHtml = `
+            <div class="themed-edit-area">
+                <label>修改备注</label>
+                <textarea id="inline-edit-remarks" class="w-full p-2 border rounded themed-ring mb-2" rows="3">${g.remarks || ""}</textarea>
+                <div class="flex justify-end space-x-2">${cancelBtnHtml}${saveBtnHtml}</div>
+            </div>`;
+            saveHandler = async () => {
+              const newRemarks = document.getElementById("inline-edit-remarks").value.trim();
+              if (newRemarks === (g.remarks || "")) return cancelHandler();
+
+              const oldRemarksText = g.remarks || "（空）";
+              const newRemarksText = newRemarks || "（空）";
+              const changeLog = `将备注由 “${oldRemarksText}” 修改为 “${newRemarksText}”`;
+
+              // <-- MODIFIED CALL: 调用新的 performUpdate 函数 -->
+              await performUpdate(giftIndex, { remarks: newRemarks }, changeLog, "remark");
+            };
+          }
+
+          // 执行DOM替换和事件绑定
+          const targetArea = document.getElementById(targetAreaId);
+          if (targetArea) {
+            targetArea.innerHTML = editHtml; // 将显示区域替换为修改区域
+            document.getElementById("inline-cancel").onclick = cancelHandler;
+            document.getElementById("inline-save").onclick = saveHandler;
+            // 隐藏主弹窗的“关闭”按钮，避免用户在修改时关闭弹窗导致状态混乱
+            document.getElementById("modal-actions").classList.add("hidden");
+          }
+        }
+
+        // --- 功能模块 (打印, 导出, 统计, 搜索) ---
+
+        /**
+         * 生成所有用于打印的页面 HTML 内容，并触发浏览器打印功能。
+         * 如果记录超过指定条数，则会弹窗要求分批打印。
+         */
+
+        function prepareForPrint() {
+          if (gifts.length === 0) {
+            return showAlert("无法打印", "当前事项没有任何礼金记录，无需打印。");
+          }
+
+          if (gifts.length > PRINT_SPLIT_THRESHOLD) {
+            showPrintChunkModal();
+            return;
+          }
+
+          let printView = document.getElementById("print-view");
+          if (printView) printView.remove();
+          printView = document.createElement("div");
+          printView.id = "print-view";
+
+          const eventCreationDate = new Date(currentEvent.startDateTime).toLocaleDateString("zh-CN");
+          document.title = `${currentEvent.name}礼金明细-${eventCreationDate}`;
+
+          const executePrint = () => {
+            const totalGiftPages = Math.ceil(gifts.length / ITEMS_PER_PAGE) || 1;
+            for (let i = 0; i < totalGiftPages; i++) {
+              const pageGifts = gifts.slice(i * ITEMS_PER_PAGE, (i + 1) * ITEMS_PER_PAGE);
+              const pageContainer = document.createElement("div");
+              pageContainer.className = "print-page";
+              const content = document.createElement("div");
+              content.className = "print-book-content";
+
+              if (i === 0) {
+                pageContainer.innerHTML += `<h1 class="print-header">${currentEvent.name}礼金明细</h1>`;
+              }
+
+              renderGiftBook(content, pageGifts);
+              pageContainer.appendChild(content);
+
+              const pageSubtotal = pageGifts.reduce((sum, gift) => sum + (gift.data?.amount || 0), 0);
+              const stats = calculateStats();
+              const isLastPage = i === totalGiftPages - 1;
+
+              pageContainer.innerHTML += `
+          <div class="print-footer">
+            <p>日期: ${eventCreationDate}</p>
+            <p class="print-page-number">第 ${i + 1} / ${totalGiftPages} 页</p>
+            <div class="print-footer-totals">
+              <span>本页小计: ${formatCurrency(pageSubtotal)}</span>
+              ${
+                isLastPage
+                  ? `
+                <span class="total-amount-print">送礼总人数: ${stats.totalGivers}</span>
+                <span class="ml-3 total-amount-print">礼金总金额: ${formatCurrency(stats.totalAmount)}</span>`
+                  : ""
+              }
+            </div>
+          </div>`;
+              printView.appendChild(pageContainer);
+            }
+
+            appendAppendixPages(printView, eventCreationDate, gifts);
+
+            document.body.appendChild(printView);
+            document.body.classList.add("printing");
+
+            setTimeout(() => {
+              window.print();
+              setTimeout(() => {
+                document.body.classList.remove("printing");
+                document.getElementById("print-view")?.remove();
+              }, 100);
+            }, 0);
+          };
+
+          if (currentEvent.coverImage) {
+            const coverPage = document.createElement("div");
+            coverPage.className = "print-page print-cover-page";
+            const coverImg = document.createElement("img");
+
+            coverImg.onload = () => {
+              executePrint();
+            };
+            coverImg.onerror = () => {
+              console.error("封面图加载失败，将不带封面进行打印。");
+              coverPage.remove();
+              executePrint();
+            };
+
+            printView.appendChild(coverPage);
+            coverPage.appendChild(coverImg);
+            coverImg.src = currentEvent.coverImage;
+          } else {
+            executePrint();
+          }
+        }
+
+        /**
+         * 当礼金记录超过阈值时，显示一个可滚动的列表，让用户选择打印部分。
+         * 弹窗在点击打印后不会关闭，并会更新列表项的状态。
+         */
+        function showPrintChunkModal() {
+          const totalChunks = Math.ceil(gifts.length / PRINT_SPLIT_THRESHOLD);
+          let contentHtml = `<p class="mb-4 text-sm text-gray-700">由于礼金记录数较多，为防止浏览器渲染PDF卡死，系统已开启分，请选择要打印/导出的部分。</p>`;
+
+          let listHtml = '<div class="space-y-2 border rounded-lg p-2 max-h-[50vh] overflow-y-auto">';
+          for (let i = 0; i < totalChunks; i++) {
+            const startRecord = i * PRINT_SPLIT_THRESHOLD + 1;
+            const endRecord = Math.min((i + 1) * PRINT_SPLIT_THRESHOLD, gifts.length);
+
+            listHtml += `<div class="print-chunk-item flex justify-between items-center p-3 rounded-lg cursor-pointer themed-link-hover" 
+                             data-chunk-index="${i}" 
+                             data-original-text="打印第 ${i + 1} 部分 (记录 ${startRecord} - ${endRecord})">
+                           <span class="main-text">打印第 ${i + 1} 部分 (记录 ${startRecord} - ${endRecord})</span>
+                           <span class="status-icon text-green-600 font-bold"></span>
+                         </div>`;
+          }
+          listHtml += "</div>";
+          contentHtml += listHtml;
+
+          showModal("分批打印/导出PDF", contentHtml, [{ text: "关闭", class: "themed-button-secondary border px-4 py-2 rounded" }]);
+
+          document
+            .getElementById("modal-content")
+            .querySelectorAll(".print-chunk-item")
+            .forEach((item) => {
+              item.onclick = (e) => {
+                const targetItem = e.currentTarget;
+                if (targetItem.dataset.status === "completed" || targetItem.dataset.status === "printing") {
+                  return;
+                }
+                const chunkIndex = parseInt(targetItem.dataset.chunkIndex, 10);
+                if (!isNaN(chunkIndex)) {
+                  executeChunkedPrint(chunkIndex, targetItem);
+                }
+              };
+            });
+        }
+
+        /**
+         * 执行分批打印，更新列表项状态，并为每部分添加封面和对应的“本部分人数”统计。
+         * @param {number} chunkIndex - 要打印的部分的索引 (从0开始)。
+         * @param {HTMLElement} [uiElement=null] - 列表项DOM元素，用于状态反馈。
+         */
+
+        function executeChunkedPrint(chunkIndex, uiElement) {
+          if (!uiElement || uiElement.dataset.status === "completed" || uiElement.dataset.status === "printing") {
+            return;
+          }
+
+          const start = chunkIndex * PRINT_SPLIT_THRESHOLD;
+          const end = Math.min(start + PRINT_SPLIT_THRESHOLD, gifts.length);
+          const chunkGifts = gifts.slice(start, end);
+          const partSubtotal = chunkGifts.reduce((sum, gift) => sum + (gift.data?.amount || 0), 0);
+
+          let printView = document.getElementById("print-view");
+          if (printView) printView.remove();
+          printView = document.createElement("div");
+          printView.id = "print-view";
+
+          const eventCreationDate = new Date(currentEvent.startDateTime).toLocaleDateString("zh-CN");
+          document.title = `${currentEvent.name}礼金明细-P${chunkIndex + 1}-${eventCreationDate}`;
+
+          const executePrint = () => {
+            const totalGiftPagesInChunk = Math.ceil(chunkGifts.length / ITEMS_PER_PAGE) || 1;
+            for (let i = 0; i < totalGiftPagesInChunk; i++) {
+              const pageGifts = chunkGifts.slice(i * ITEMS_PER_PAGE, (i + 1) * ITEMS_PER_PAGE);
+              const pageContainer = document.createElement("div");
+              pageContainer.className = "print-page";
+              const content = document.createElement("div");
+              content.className = "print-book-content";
+              if (i === 0) {
+                pageContainer.innerHTML += `<h1 class="print-header">${currentEvent.name}礼金明细 (P${chunkIndex + 1})</h1>`;
+              }
+              renderGiftBook(content, pageGifts);
+              pageContainer.appendChild(content);
+              const pageSubtotal = pageGifts.reduce((sum, gift) => sum + (gift.data?.amount || 0), 0);
+              const stats = calculateStats();
+              const isLastPageOfChunk = i === totalGiftPagesInChunk - 1;
+
+              pageContainer.innerHTML += `
+              <div class="print-footer">
+                <p>日期: ${eventCreationDate}</p>
+                <p class="print-page-number">第 ${i + 1} / ${totalGiftPagesInChunk} 页</p>
+                <div class="print-footer-totals">
+                  <span>本页小计: ${formatCurrency(pageSubtotal)}</span>
+                  ${
+                    isLastPageOfChunk
+                      ? `
+                    <div>
+                      <span class="total-amount-print">本部分记录人数: ${chunkGifts.length}</span>
+                      <span class="total-amount-print">本部分小计: ${formatCurrency(partSubtotal)}</span>
+                    </div>
+                    <span class="total-amount-print ml-3">送礼总人数: ${stats.totalGivers}</span>
+                    <span class="ml-3 total-amount-print">礼金总金额: ${formatCurrency(stats.totalAmount)}</span>`
+                      : ""
+                  }
+                </div>
+              </div>`;
+              printView.appendChild(pageContainer);
+            }
+
+            appendAppendixPages(printView, eventCreationDate, chunkGifts);
+            document.body.appendChild(printView);
+            document.body.classList.add("printing");
+
+            setTimeout(() => {
+              window.print();
+              setTimeout(() => {
+                document.body.classList.remove("printing");
+                document.getElementById("print-view")?.remove();
+
+                uiElement.dataset.status = "completed";
+                const mainTextSpan = uiElement.querySelector(".main-text");
+                const originalText = uiElement.dataset.originalText || "";
+                mainTextSpan.textContent = `${originalText} (已完成)`;
+                uiElement.querySelector(".status-icon").innerHTML = "&#10004;"; // Checkmark symbol
+                uiElement.classList.remove("cursor-wait");
+                uiElement.classList.add("cursor-default", "opacity-70");
+              }, 100);
+            }, 0);
+          };
+
+          if (currentEvent.coverImage) {
+            const coverPage = document.createElement("div");
+            coverPage.className = "print-page print-cover-page";
+            const coverImg = document.createElement("img");
+            coverImg.onload = executePrint;
+            coverImg.onerror = () => {
+              console.error("封面图加载失败，将不带封面进行打印。");
+              coverPage.remove();
+              executePrint();
+            };
+            printView.appendChild(coverPage);
+            coverPage.appendChild(coverImg);
+            coverImg.src = currentEvent.coverImage;
+          } else {
+            executePrint();
+          }
+        }
+
+        /**
+         * 生成并附加备注附录页面到打印视图。
+         * @param {HTMLElement} printView - 打印视图的容器元素。
+         * @param {string} dateString - 日期字符串。
+         * @param {Array} giftSourceArray - 用于生成附录的礼金记录数组（可以是全部或一个部分）。
+         */
+        function appendAppendixPages(printView, dateString, giftSourceArray) {
+          const remarkedItems = giftSourceArray
+            .map((gift, index) => ({ ...gift, chunkIndex: index })) // 使用相对于传入数组的索引
+            .filter((g) => g.data && g.data.remarks);
+
+          if (remarkedItems.length === 0) return;
+
+          const APPENDIX_ROWS_PER_PAGE = 10;
+          const totalAppendixPages = Math.ceil(remarkedItems.length / APPENDIX_ROWS_PER_PAGE);
+
+          for (let j = 0; j < totalAppendixPages; j++) {
+            const pageItems = remarkedItems.slice(j * APPENDIX_ROWS_PER_PAGE, (j + 1) * APPENDIX_ROWS_PER_PAGE);
+            const appendixPage = document.createElement("div");
+            appendixPage.className = "print-page";
+
+            const tableRows = pageItems
+              .map(
+                (item) => `
+              <tr>
+                <td>${item.data.name}</td>
+                <td>第 ${Math.floor(item.chunkIndex / ITEMS_PER_PAGE) + 1} 页第 ${(item.chunkIndex % ITEMS_PER_PAGE) + 1} 位</td>
+                <td>${item.data.remark || item.data.remarks}</td>
+              </tr>
+          `
+              )
+              .join("");
+
+            appendixPage.innerHTML = `
+              <h1 class="print-header">附录：宾客备注</h1>
+              <table class="print-appendix-table">
+                  <thead>
+                      <tr><th>姓名</th><th>本部分记录索引</th><th>备注信息</th></tr>
+                  </thead>
+                  <tbody>${tableRows}</tbody>
+              </table>
+              <div class="print-footer">
+                  <p>日期: ${dateString}</p>
+                  <p class="print-page-number">附录 第 ${j + 1} / ${totalAppendixPages} 页</p>
+                  <div class="print-footer-totals" style="opacity: 0;"></div>
+              </div>`;
+            printView.appendChild(appendixPage);
+          }
+        }
+
+        /**
+         * 将当前礼金数据导出为 Excel 文件。
+         */
+        function exportToExcel() {
+          // 1. 定义一个辅助函数，用于将 history 数组格式化为字符串
+          const formatHistoryToString = (historyArray) => {
+            if (!historyArray || historyArray.length === 0) {
+              return "无修改记录"; // 如果没有历史记录，则返回明确的文本
+            }
+
+            // 使用 map 遍历历史记录，并按照时间倒序排列
+            return [...historyArray] // 创建一个副本以避免修改原始数据
+              .reverse() // 将最新的修改放在最前面
+              .map((record, index) => {
+                const recordTime = new Date(record.timestamp).toLocaleString("zh-CN");
+                // 格式为：[序号] 时间: 修改内容;
+                return `[${index + 1}] ${recordTime}: ${record.changeLog}`;
+              })
+              .join("\n"); // 使用换行符分隔每一条记录，在Excel单元格内会自动换行
+          };
+
+          const dataToExport = gifts.map((g) => ({
+            姓名: g.data.name,
+            金额: g.data.amount,
+            收款类型: g.data.type,
+            备注: g.data.remarks,
+            最新更新时间: new Date(g.data.timestamp).toLocaleString("zh-CN"),
+            修改日志: formatHistoryToString(g.data.history),
+          }));
+
+          if (dataToExport.length > 0) {
+            const stats = calculateStats();
+
+            // 添加一个空行作为分隔
+            dataToExport.push({});
+
+            // 添加统计信息行
+            dataToExport.push({
+              姓名: "总计",
+              金额: stats.totalAmount,
+              收款类型: `共 ${stats.totalGivers} 人`,
+              // 其他列留空
+            });
+          }
+
+          // 3. 创建工作簿和工作表 (这部分不变)
+          const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+          // 4. (可选但强烈推荐) 调整列宽以获得更好的可读性
+          const columnWidths = [
+            { wch: 15 }, // 姓名
+            { wch: 12 }, // 金额
+            { wch: 12 }, // 收款类型
+            { wch: 30 }, // 备注
+            { wch: 22 }, // 最新更新时间
+            { wch: 60 }, // 修改日志 (设置一个较宽的宽度)
+          ];
+          worksheet["!cols"] = columnWidths;
+
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "礼金明细");
+
+          // 5. 导出文件 (文件名也可以更具体)
+          XLSX.writeFile(workbook, `${currentEvent.name}_礼金明细.xlsx`);
+        }
+        /**
+         * 计算统计数据。
+         * @returns {{totalAmount: number, totalGivers: number, byType: object}}
+         */
+        function calculateStats() {
+          const stats = {
+            totalAmount: 0,
+            totalGivers: gifts.length,
+            byType: { 现金: 0, 支付宝: 0, 微信: 0, 其他: 0 },
+          };
+          gifts.forEach(({ data }) => {
+            if (data) {
+              stats.totalAmount += data.amount;
+              stats.byType[data.type] = (stats.byType[data.type] || 0) + data.amount;
+            }
+          });
+          return stats;
+        }
+
+        /**
+         * 显示统计数据弹窗，包含汇总信息和可搜索、排序的表格。
+         */
+        function showStatistics() {
+          dom.modal.classList.add("modal-large");
+          const stats = calculateStats();
+          const statsHtml = `
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div id="grid-container" class="md:col-span-3"></div>
+        <div class="space-y-4">
+          <div class="flex justify-between p-3 bg-gray-100 rounded-lg">
+              <span class="font-bold">总送礼人数:</span>
+              <span class="font-bold themed-text">${stats.totalGivers} 人</span>
+          </div>
+          <div class="flex justify-between p-3 bg-gray-100 rounded-lg">
+              <span class="font-bold">总礼金金额:</span>
+              <span class="font-bold themed-text">${formatCurrency(stats.totalAmount)}</span>
+          </div>
+          <div class="border-t pt-4 mt-4">
+              <h4 class="font-semibold mb-2">按收款方式统计:</h4>
+              <ul class="space-y-2">${Object.entries(stats.byType)
+                .map(([type, amount]) => `<li class="flex justify-between"><span>${type}:</span> <span>${formatCurrency(amount)}</span></li>`)
+                .join("")}</ul>
+          </div>
+        </div>
+      </div>`;
+
+          showModal("礼金统计详情", statsHtml, [{ text: "关闭", class: "border themed-button-secondary px-4 py-2 rounded" }]);
+
+          const tableData = gifts.map((g) => [g.data.name, g.data.amount, g.data.remarks || "无", g.data.type, new Date(g.data.timestamp).toLocaleString("zh-CN")]);
+
+          new gridjs.Grid({
+            columns: ["姓名", "金额 (元)", "备注", "收款类型", "录入时间"],
+            data: tableData,
+            search: true,
+            sort: true,
+            fixedHeader: true,
+            width: "100%",
+            height: "50vh",
+            language: {
+              search: { placeholder: "搜索..." },
+              pagination: { previous: "上一页", next: "下一页", showing: "显示", results: () => "条结果", to: "到", of: "共" },
+              loading: "加载中...",
+              noRecordsFound: "未找到匹配的记录",
+              error: "获取数据时发生错误",
+            },
+            style: { th: { "background-color": "var(--primary-color)", color: "#fff" } },
+          }).render(document.getElementById("grid-container"));
+        }
+
+        /**
+         * 处理姓名搜索。
+         */
+        function handleSearch() {
+          const searchTerm = dom.searchNameInput.value.trim();
+          if (!searchTerm) {
+            return showAlert("提示", "请输入姓名进行搜索。", false);
+          }
+          const results = gifts.map((g, index) => ({ ...g, originalIndex: index })).filter((g) => g.data?.name.includes(searchTerm));
+
+          dom.searchNameInput.blur();
+          if (results.length === 0) {
+            return showAlert("查找结果", `没有找到姓名为 “${searchTerm}” 的记录。`);
+          }
+
+          const resultsHtml = results
+            .map(
+              (r) => `
+        <div class="p-3 border-b flex justify-between items-center">
+          <div>
+            <p><strong>姓名:</strong> ${r.data.name}</p>
+            <p><strong>金额:</strong> ${r.data.amount.toFixed(2)} 元 (${r.data.type})</p>
+            ${r.data.remarks ? `<p class="text-red-500"><strong>备注:</strong> ${r.data.remarks}</p>` : ""}
+          </div>
+          <button class="view-details-btn themed-button-primary px-3 py-1 rounded" data-gift-index="${r.originalIndex}">查看详情</button>
+        </div>`
+            )
+            .join("");
+          showModal(`“${searchTerm}” 的搜索结果`, `<div class="max-h-80 overflow-y-auto">${resultsHtml}</div>`, [{ text: "关闭", class: "themed-button-secondary border px-4 py-2 rounded" }]);
+        }
+
+        /**
+         * 显示一个用于修改当前事项名称、礼簿封面图和语音音色的弹窗。
+         */
+        async function showEditEventInfoModal() {
+          let coverImageForUpdate = currentEvent.coverImage;
+          let shouldRemoveCover = false;
+
+          const content = `
+    <div class="space-y-4 text-left">
+        <div>
+            <label for="edit-event-name-input" class="block text-sm font-medium text-gray-700">事项名称</label>
+            <input type="text" id="edit-event-name-input" class="w-full mt-1 p-2 border rounded themed-ring" value="${currentEvent.name}">
         </div>
         
-        <?php if ($result->num_rows > 0): ?>
-            <table>
-                <thead>
-                    <tr>
-                        <th>姓名</th>
-                        <th>金额</th>
-                        <th>关系</th>
-                        <th>留言</th>
-                        <th>记录时间</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($row = $result->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $row['name']; ?></td>
-                            <td>¥<?php echo number_format($row['amount'], 2); ?></td>
-                            <td><?php echo $row['relation']; ?></td>
-                            <td><?php echo $row['message']; ?></td>
-                            <td><?php echo $row['created_at']; ?></td>
-                            <td>
-                                <div class="actions">
-                                    <a href="?delete=<?php echo $row['id']; ?>" class="delete-btn" onclick="return confirm('确定要删除这条记录吗？');">删除</a>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <p>暂无记录</p>
-        <?php endif; ?>
-    </div>
-    
-    <?php
-    // 关闭数据库连接
-    $conn->close();
-    ?>
-</body>
+        <div>
+            <label for="edit-event-voice" class="block text-sm font-medium text-gray-700">语音播报音色</label>
+            <div class="flex items-center gap-2 mt-1">
+                <select id="edit-event-voice" class="text-sm flex-grow w-full p-2 border rounded themed-ring">
+                    <option value="">默认音色</option>
+                </select>
+                <button type="button" id="preview-edit-voice-btn" class="themed-button-secondary border p-2 rounded whitespace-nowrap">预览</button>
+            </div>
+        </div>
+
+        <!-- START: 新增起报金额设置 -->
+        <div>
+            <label for="edit-min-speech-amount" class="block text-sm font-medium text-gray-700">语音播报起报金额 (元)</label>
+            <input type="number" id="edit-min-speech-amount" min="0" step="1" class="w-full mt-1 p-2 border rounded themed-ring" value="${currentEvent.minSpeechAmount || 0}">
+            <p class="text-xs text-gray-500 mt-1">只有大于或等于此金额的礼金才会被播报。设置为0则全部播报。</p>
+        </div>
+        <!-- END: 新增起报金额设置 -->
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">礼簿(打印/导出PDF)封面图</label>
+            <img id="edit-cover-preview" src="${currentEvent.coverImage || ""}" alt="封面预览" class="my-2 rounded-lg ${!currentEvent.coverImage ? "hidden" : ""} max-w-full h-auto max-h-48 object-contain">
+            <input type="file" id="edit-cover-image-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"/>
+            ${currentEvent.coverImage ? '<button id="remove-cover-btn" class="mt-2 text-sm text-red-600 hover:underline">删除当前礼簿封面图</button>' : ""}
+             <p class="text-xs text-gray-500 mt-2">尺寸建议842 x 595px, 格式jpg/PNG, 大小不超过2M。</p>
+        </div>
+    </div>`;
+
+          showModal("设置事项", content, [
+            { text: "取消", class: "themed-button-secondary border px-4 py-2 rounded" },
+            {
+              text: "保存",
+              class: "themed-button-primary px-4 py-2 rounded",
+              handler: async () => {
+                const newName = document.getElementById("edit-event-name-input").value.trim();
+                const newVoiceName = document.getElementById("edit-event-voice").value;
+                // --- 新增：获取起报金额的值 ---
+                const newMinSpeechAmount = parseFloat(document.getElementById("edit-min-speech-amount").value) || 0;
+                if (!newName) return showAlert("错误", "事项名称不能为空！");
+
+                const newCoverFile = document.getElementById("edit-cover-image-upload").files[0];
+                if (newCoverFile) {
+                  if (!isCoverFileSizeValid(newCoverFile)) return;
+                  try {
+                    coverImageForUpdate = await readFileAsBase64(newCoverFile);
+                  } catch (error) {
+                    console.error("礼簿封面图读取失败:", error);
+                    return showAlert("错误", "礼簿封面图读取失败，请尝试其他图片。");
+                  }
+                } else if (shouldRemoveCover) {
+                  coverImageForUpdate = null;
+                }
+
+                // --- 修改：在要更新的事项对象中加入起报金额 ---
+                const updatedEvent = { ...currentEvent, name: newName, voiceName: newVoiceName, coverImage: coverImageForUpdate, minSpeechAmount: newMinSpeechAmount };
+                try {
+                  await promisifyRequest(db.transaction("events", "readwrite").objectStore("events").put(updatedEvent));
+
+                  currentEvent.name = newName;
+                  currentEvent.voiceName = newVoiceName;
+                  currentEvent.coverImage = coverImageForUpdate;
+                  // --- 新增：同步更新内存中的当前事项数据 ---
+                  currentEvent.minSpeechAmount = newMinSpeechAmount;
+                  dom.currentEventTitleEl.textContent = newName;
+
+                  const sessionData = JSON.parse(sessionStorage.getItem("activeEventSession"));
+                  if (sessionData) {
+                    sessionStorage.setItem("activeEventSession", JSON.stringify({ event: currentEvent, encryptedPassword: sessionData.encryptedPassword }));
+                  }
+                  showAlert("成功", "事项设置修改成功。", false);
+                } catch (error) {
+                  showAlert("错误", "事项设置修改失败。");
+                }
+              },
+            },
+          ]);
+
+          const voiceSelectElement = document.getElementById("edit-event-voice");
+          populateVoiceList(voiceSelectElement, currentEvent.voiceName);
+          if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => populateVoiceList(voiceSelectElement, currentEvent.voiceName);
+          }
+
+          document.getElementById("preview-edit-voice-btn").addEventListener("click", () => {
+            previewSelectedVoice(voiceSelectElement);
+          });
+
+          const fileInput = document.getElementById("edit-cover-image-upload");
+          const preview = document.getElementById("edit-cover-preview");
+          const removeBtn = document.getElementById("remove-cover-btn");
+
+          fileInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.classList.remove("hidden");
+                shouldRemoveCover = false;
+                if (removeBtn) {
+                  removeBtn.textContent = "撤销选择";
+                  removeBtn.disabled = false;
+                }
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+
+          if (removeBtn) {
+            removeBtn.onclick = () => {
+              shouldRemoveCover = true;
+              coverImageForUpdate = null;
+              preview.classList.add("hidden");
+              preview.src = "";
+              fileInput.value = "";
+              removeBtn.textContent = "礼簿封面图已删除";
+              removeBtn.disabled = true;
+            };
+          }
+        }
+
+        /**
+         * 核心：执行带留痕的更新操作 (合并版本)
+         * 1. 根据更新类型验证权限 -> 2. 创建快照 -> 3. 更新数据 -> 4. 保存DB -> 5. 刷新UI
+         * @param {number} giftIndex - 礼金记录在 gifts 数组中的索引
+         * @param {object} newFields - 一个包含要更新字段的对象，例如 { name: "新名字" } 或 { remarks: "新备注" }
+         * @param {string} changeLogText - 用于写入历史记录的变更描述文本
+         * @param {'correction' | 'remark'} updateType - 更新的类型，'correction' (纠错) 需要强制密码，'remark' (备注) 仅在超时后需要密码
+         */
+        async function performUpdate(giftIndex, newFields, changeLogText, updateType) {
+          // 1. 根据更新类型验证权限
+          let authorized = false;
+          if (updateType === "correction") {
+            // 对于姓名、金额等关键信息修改，总是要求输入密码
+            authorized = await requestAdminPassword("修改确认", "此修改将被永久记录在案。请输入管理密码以继续。");
+          } else if (updateType === "remark") {
+            // 对于备注修改，只在超出事项时间范围时要求密码
+            const isOutOfTime = new Date() < new Date(currentEvent.startDateTime) || new Date() > new Date(currentEvent.endDateTime);
+            if (isOutOfTime) {
+              authorized = await requestAdminPassword("备注补录", "当前已超出有效录入时间，请输入管理密码以修改备注。");
+            } else {
+              authorized = true; // 在有效时间内修改备注，无需密码
+            }
+          }
+
+          if (!authorized) {
+            showAlert("错误", "管理密码不正确或操作已取消，修改未保存。", () => {
+              showGiftDetailsModal(giftIndex);
+            });
+            return;
+          }
+
+          const giftObject = gifts[giftIndex];
+          const currentData = { ...giftObject.data }; // 浅拷贝当前数据作为快照基础
+          const now = new Date().toISOString();
+
+          // 2. 创建历史记录条目 (Snapshot 仅包含核心数据，不包含之前的 history，防止无限嵌套)
+          const snapshot = {
+            name: currentData.name,
+            amount: currentData.amount,
+            type: currentData.type,
+            remarks: currentData.remarks,
+            timestamp: currentData.timestamp,
+          };
+
+          const historyEntry = {
+            timestamp: now, // 修改发生的时刻
+            changeLog: changeLogText,
+            snapshot: snapshot,
+            type: updateType, // 使用传入的类型
+          };
+
+          // 3. 准备新数据
+          const updatedData = {
+            ...currentData,
+            ...newFields, // 应用新字段
+            timestamp: now, // 更新主记录时间
+            history: currentData.history ? [...currentData.history, historyEntry] : [historyEntry], // 追加历史
+          };
+
+          // 4. 加密并保存到数据库
+          try {
+            const encryptedData = encryptData(updatedData, currentPassword);
+            const recordToUpdate = { ...giftObject, encryptedData };
+            await promisifyRequest(db.transaction("gifts", "readwrite").objectStore("gifts").put(recordToUpdate));
+
+            // 5. 更新内存和 UI
+            gifts[giftIndex].data = updatedData;
+            gifts[giftIndex].encryptedData = encryptedData;
+            render(); // 刷新礼簿主界面（更新金额和“*已修改”标记）
+            closeModal();
+
+            // 短暂延迟后重新打开详情页，展示更新后的状态和时间轴
+            setTimeout(() => {
+              showGiftDetailsModal(giftIndex);
+            }, 300);
+          } catch (error) {
+            console.error("保存失败", error);
+            // 关键修复：当保存失败时，弹窗并强制重新渲染详情，确保UI与数据库一致
+            showAlert("系统错误", "保存修改记录时失败。您的修改未生效。", () => {
+              showGiftDetailsModal(giftIndex);
+            });
+          }
+        }
+
+        /**
+         * 触发删除当前事项的流程，需要密码确认。
+         */
+        async function deleteCurrentEvent() {
+          if (!currentEvent) return;
+
+          const content = `<p>此操作将永久删除事项 “<strong>${currentEvent.name}</strong>” 及其所有礼金记录，且无法恢复。</p>
+       <p class="mt-4">请输入管理密码以确认：</p>
+       <input type="password" id="delete-confirm-password" class="w-full p-2 border rounded mt-2 themed-ring">`;
+
+          showModal(`删除确认`, content, [
+            { text: "取消", class: "themed-button-secondary border px-4 py-2 rounded" },
+            {
+              text: "确认删除",
+              class: "themed-button-primary  text-white px-4 py-2 rounded", // 使用更醒目的红色按钮
+              handler: async () => {
+                const passwordInput = document.getElementById("delete-confirm-password").value;
+                if (hashPassword(passwordInput) !== currentEvent.passwordHash) {
+                  return showAlert("错误", "管理密码错误，删除操作已取消。");
+                }
+                try {
+                  const transaction = db.transaction(["events", "gifts"], "readwrite");
+                  const eventsStore = transaction.objectStore("events");
+                  const giftsStore = transaction.objectStore("gifts");
+                  const giftsIndex = giftsStore.index("eventId");
+
+                  // 删除所有关联的礼金记录
+                  const giftKeys = await promisifyRequest(giftsIndex.getAllKeys(currentEvent.id));
+                  giftKeys.forEach((key) => giftsStore.delete(key));
+
+                  // 删除事项本身
+                  eventsStore.delete(currentEvent.id);
+
+                  await new Promise((resolve) => (transaction.oncomplete = resolve));
+                  showAlert("成功", `事项 “${currentEvent.name}” 已被成功删除。`, false);
+                  showSetupScreen(); // 返回到设置界面
+                } catch (error) {
+                  console.error("删除事项时发生错误:", error);
+                  showAlert("删除失败", "删除过程中发生错误。");
+                }
+              },
+            },
+          ]);
+          setTimeout(() => document.getElementById("delete-confirm-password")?.focus(), 50);
+        }
+
+        // --- 工具与辅助函数 ---
+
+        const formatCurrency = (amount) => new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" }).format(amount || 0);
+        /**
+         * 使用浏览器语音合成API播报礼金信息。
+         * 如果事项设置了特定音色，则使用该音色。
+         * @param {string} name - 姓名。
+         * @param {number} amount - 金额。
+         */
+        function speakGift(name, amount) {
+          const minAmount = currentEvent.minSpeechAmount || 0;
+          if (!isSpeechEnabled || !("speechSynthesis" in window) || amount < minAmount) return;
+          const ttsText = amountToChinese(amount).replace(/陆/g, "六");
+
+          const textToSpeak = currentEvent.theme === "theme-solemn" ? `${name}，${ttsText}` : `${name} 贺礼 ${ttsText}`;
+          const utterance = new SpeechSynthesisUtterance(textToSpeak);
+          utterance.lang = "zh-CN";
+
+          if (currentEvent.voiceName) {
+            const voices = speechSynthesis.getVoices();
+            const selectedVoice = voices.find((voice) => voice.name === currentEvent.voiceName);
+            if (selectedVoice) {
+              utterance.voice = selectedVoice;
+            }
+          }
+
+          speechSynthesis.speak(utterance);
+        }
+
+        /**
+         * 播放使用指定 <select> 元素中所选音色的语音预览。
+         * @param {HTMLSelectElement} selectElement - 包含音色选项的下拉框。
+         */
+        function previewSelectedVoice(selectElement) {
+          if (!("speechSynthesis" in window)) {
+            return showAlert("错误", "您的浏览器不支持语音播报功能。");
+          }
+
+          // 停止任何当前正在播放的语音，防止重叠
+          speechSynthesis.cancel();
+
+          const selectedVoiceName = selectElement.value;
+          const utterance = new SpeechSynthesisUtterance("张三贺礼五百元整");
+          utterance.lang = "zh-CN";
+
+          if (selectedVoiceName) {
+            const voices = speechSynthesis.getVoices();
+            const selectedVoice = voices.find((voice) => voice.name === selectedVoiceName);
+            if (selectedVoice) {
+              utterance.voice = selectedVoice;
+            }
+          }
+
+          speechSynthesis.speak(utterance);
+        }
+
+        /**
+         * 将数字金额转换为中文大写。
+         * @param {number|string} n - 数字金额。
+         * @returns {string} 中文大写金额。
+         */
+        function amountToChinese(n) {
+          if (typeof n !== "number" && typeof n !== "string") return "";
+          n = parseFloat(n);
+          if (isNaN(n) || n === null) return "";
+          if (n === 0) return "零元整";
+          let unit = "京亿万仟佰拾兆万仟佰拾亿仟佰拾万仟佰拾元角分",
+            str = "",
+            s = n.toString();
+          if (s.indexOf(".") > -1) s = (n * 100).toFixed(0);
+          else s += "00";
+          if (s.length > unit.length) return "金额过大";
+          unit = unit.substr(unit.length - s.length);
+          for (let i = 0; i < s.length; i++) str += "零壹贰叁肆伍陆柒捌玖".charAt(s.charAt(i)) + unit.charAt(i);
+          return str
+            .replace(/零(仟|佰|拾|角)/g, "零")
+            .replace(/(零)+/g, "零")
+            .replace(/零(兆|万|亿|元)/g, "$1")
+            .replace(/(兆|亿)万/g, "$1")
+            .replace(/(京|兆)亿/g, "$1")
+            .replace(/(京)兆/g, "$1")
+            .replace(/(亿)万/g, "$1")
+            .replace(/(京|兆|亿|仟|佰|拾)(万?)(.)/g, "$1$2$3")
+            .replace(/零元/g, "元")
+            .replace(/零分/g, "")
+            .replace(/零角/g, "零")
+            .replace(/元$/g, "元整")
+            .replace(/角$/g, "角整");
+        }
+
+        /**
+         * 为新建事项的表单设置默认的开始和结束时间。
+         */
+        function setDefaultTimes() {
+          const now = new Date();
+          const pad = (num) => num.toString().padStart(2, "0");
+          const currentDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+          const currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+          dom.startDateInput.value = currentDate;
+          dom.startTimeInput.value = currentTime;
+          dom.endDateInput.value = currentDate;
+          dom.endTimeInput.value = "23:59";
+        }
+
+        /**
+         * 读取 File 对象并转换为 Base64 字符串。
+         * @param {File} file - 要读取的文件。
+         * @returns {Promise<string>}
+         */
+        function readFileAsBase64(file) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+          });
+        }
+
+        /**
+         * 检查礼簿封面图文件大小是否合法。
+         * @param {File} file - 文件对象。
+         * @returns {boolean}
+         */
+        function isCoverFileSizeValid(file) {
+          if (file.size > MAX_COVER_IMAGE_SIZE) {
+            showAlert("图片过大", `礼簿封面图文件大小不能超过 ${MAX_COVER_IMAGE_SIZE / 1024 / 1024}MB，请压缩后上传。`);
+            return false;
+          }
+          return true;
+        }
+
+        // 用于跟踪当前活动的通知元素和其隐藏计时器
+        let activeNotification = { element: null, timer: null };
+
+        /**
+         * 显示一个全局通知，它会自动替换上一个通知，并在3秒后消失。
+         * @param {string} message - 要显示的消息文本.
+         * @param {'info'|'success'|'error'} type - 通知类型，决定颜色和图标. ('info' 会显示一个加载动画).
+         */
+        function showNotification(message, type = "info") {
+          // 1. 清除上一个通知（如果有），确保屏幕上只有一个
+          if (activeNotification.element) {
+            clearTimeout(activeNotification.timer);
+            activeNotification.element.remove();
+          }
+
+          // 2. 创建新的通知元素
+          const notification = document.createElement("div");
+
+          // --- START: 核心修改 1 ---
+          // 添加 transform 和 -translate-y-full 类，让元素初始时位于屏幕正上方看不见的位置
+          notification.className = "fixed top-5 right-5 flex items-center px-4 py-3 rounded-lg shadow-xl text-white z-[100] transition-all duration-500 ease-in-out opacity-0 -translate-y-full";
+          // --- END: 核心修改 1 ---
+
+          // 3. 根据类型选择样式
+          const styles = {
+            info: { icon: "ri-loader-4-line animate-spin", bg: "bg-blue-600" },
+            success: { icon: "ri-check-line", bg: "bg-green-600" },
+            error: { icon: "ri-error-warning-line", bg: "bg-red-600" },
+          };
+          const style = styles[type] || styles.info;
+          notification.classList.add(style.bg);
+
+          // 4. 设置内容
+          notification.innerHTML = `
+        <i class="${style.icon} text-xl mr-3"></i>
+        <span>${message}</span>
+    `;
+
+          // 5. 添加到页面，并触发“出现”动画
+          document.body.appendChild(notification);
+          setTimeout(() => {
+            // --- START: 核心修改 2 ---
+            // 移除 opacity-0 和 -translate-y-full
+            // 这会触发 CSS transition，让元素平滑移动到 translate-y-0 (原始位置) 并变为不透明
+            notification.classList.remove("opacity-0", "-translate-y-full");
+            // --- END: 核心修改 2 ---
+          }, 10); // 短暂延迟确保元素已渲染
+
+          // 6. 设置3秒后自动关闭的计时器
+          const timer = setTimeout(() => {
+            // --- START: 核心修改 3 ---
+            // 重新添加这两个类，触发“消失”动画，元素向上滑出并变为透明
+            notification.classList.add("opacity-0", "-translate-y-full");
+            // --- END: 核心修改 3 ---
+
+            // 动画结束后，从 DOM 中移除该元素
+            notification.addEventListener("transitionend", () => notification.remove());
+            activeNotification = { element: null, timer: null };
+          }, 3000); // 持续时间调整为3秒
+
+          // 7. 保存对当前通知的引用
+          activeNotification = { element: notification, timer: timer };
+        }
+
+        /**
+         * 获取并填充所有可用的中文语音到指定的 <select> 元素中。
+         * @param {HTMLSelectElement} selectElement - 用于填充音色的下拉框元素。
+         * @param {string} [selectedValue] - （可选）需要默认选中的音色名称。
+         */
+        function populateVoiceList(selectElement, selectedValue) {
+          const voices = speechSynthesis.getVoices().filter((v) => v.lang.startsWith("zh"));
+          if (!selectElement || voices.length === 0) return;
+
+          const currentVal = selectElement.value; // 保存当前可能已选择的值
+          selectElement.innerHTML = '<option value="">默认音色</option>';
+
+          voices.forEach((voice) => {
+            const option = document.createElement("option");
+            option.value = voice.name;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            selectElement.appendChild(option);
+          });
+
+          // 尝试恢复之前的选择或设置传入的默认值
+          selectElement.value = selectedValue || currentVal || "";
+        }
+
+        // --- 事件监听器绑定 ---
+
+        /**
+         * 统一设置应用的所有事件监听器。
+         */
+        function bindEventListeners() {
+          // 设置界面
+          dom.createEventForm.addEventListener("submit", handleCreateEventSubmit);
+          dom.unlockEventBtn.addEventListener("click", () => {
+            const eventId = parseInt(dom.eventSelector.value, 10);
+            if (eventId) handleUnlockEvent(eventId);
+            else showAlert("提示", "请先选择一个事项。");
+          });
+
+          // 监听备注框的回车事件以快速提交 ---
+          dom.remarksInput.addEventListener("keydown", (e) => {
+            // 当用户按下 Enter 键，并且没有同时按下 Shift 键时 (Shift+Enter 仍用于换行)
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault(); // 阻止默认的回车换行行为
+              // 模拟点击提交按钮
+              dom.addGiftForm.querySelector('button[type="submit"]')?.click();
+            }
+          });
+
+          dom.coverImageUpload.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                dom.coverPreview.src = e.target.result;
+                dom.coverPreview.classList.remove("hidden");
+              };
+              reader.readAsDataURL(file);
+            } else {
+              dom.coverPreview.src = "";
+              dom.coverPreview.classList.add("hidden");
+            }
+          });
+
+          // 主界面
+          dom.addGiftForm.addEventListener("submit", handleAddGiftSubmit);
+          dom.prevPageBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+              currentPage--;
+              ensureCurrentPageDecrypted(); // 👈 添加这行
+              render();
+            }
+          });
+          dom.nextPageBtn.addEventListener("click", () => {
+            const totalPages = Math.ceil(gifts.length / ITEMS_PER_PAGE) || 1;
+            if (currentPage < totalPages) {
+              currentPage++;
+              ensureCurrentPageDecrypted(); // 👈 添加这行
+              render();
+            }
+          });
+          dom.searchIcon.addEventListener("click", handleSearch);
+          dom.searchNameInput.addEventListener("keyup", (e) => e.key === "Enter" && handleSearch());
+          dom.printBtn.addEventListener("click", prepareForPrint);
+          dom.exportExcelBtn.addEventListener("click", exportToExcel);
+          dom.statsBtn.addEventListener("click", showStatistics);
+          dom.speechToggle.addEventListener("change", (e) => (isSpeechEnabled = e.target.checked));
+
+          // 礼簿点击事件委托
+          dom.giftBookContent.addEventListener("click", (e) => {
+            const cell = e.target.closest("[data-gift-index]");
+            if (!cell) return;
+
+            const giftIndex = parseInt(cell.dataset.giftIndex, 10);
+            if (isNaN(giftIndex)) return;
+
+            if (cell.classList.contains("name-cell")) {
+              showGiftDetailsModal(giftIndex);
+            } else if (cell.classList.contains("amount-cell") && gifts[giftIndex]) {
+              const { name, amount } = gifts[giftIndex].data;
+              speakGift(name, amount);
+            }
+          });
+
+          // 事项切换下拉菜单
+          dom.eventSwitcherTrigger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const dropdown = dom.eventDropdown;
+            const isHidden = dropdown.classList.contains("hidden");
+            if (isHidden) {
+              dropdown.innerHTML = `
+                <a href="#" class="block px-4 py-2 text-sm themed-text font-semibold themed-link-hover" data-action="switch">切换/创建事项</a>
+                <a href="#" class="block px-4 py-2 text-sm themed-text font-semibold themed-link-hover" data-action="edit">设置此事项</a>
+                <a href="#" class="block px-4 py-2 text-sm themed-text font-semibold themed-link-hover" data-action="delete">删除此事项</a>`;
+            }
+            dropdown.classList.toggle("hidden");
+          });
+
+          dom.eventDropdown.addEventListener("click", (e) => {
+            e.preventDefault();
+            const action = e.target.dataset.action;
+            if (action) {
+              dom.eventDropdown.classList.add("hidden");
+              switch (action) {
+                case "switch":
+                  showSetupScreen();
+                  break;
+                case "edit":
+                  showEditEventInfoModal();
+                  break;
+                case "delete":
+                  deleteCurrentEvent();
+                  break;
+              }
+            }
+          });
+
+          //分页输入框的事件委托 ---
+          dom.pageInfoEl.addEventListener("focusout", (e) => {
+            // focusout 事件会冒泡，适合委托
+            if (e.target && e.target.id === "current-page-input") {
+              handlePageInputChange(e);
+            }
+          });
+
+          dom.pageInfoEl.addEventListener("keydown", (e) => {
+            if (e.target && e.target.id === "current-page-input" && e.key === "Enter") {
+              e.preventDefault(); // 阻止回车键的默认行为（如表单提交）
+              handlePageInputChange(e);
+              e.target.blur(); // 触发 blur，同时也让输入框失去焦点
+            }
+          });
+          // 全屏功能监听
+          dom.fullscreenBtn.addEventListener("click", () => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen();
+            } else if (document.exitFullscreen) {
+              document.exitFullscreen();
+            }
+          });
+
+          // 监听全屏状态变化 (例如用户按 ESC 退出)，自动切换图标
+          document.addEventListener("fullscreenchange", () => {
+            const isFullscreen = !!document.fullscreenElement;
+            if (isFullscreen) {
+              dom.fullscreenIcon.classList.remove("ri-fullscreen-line");
+              dom.fullscreenIcon.classList.add("ri-fullscreen-exit-line");
+            } else {
+              dom.fullscreenIcon.classList.remove("ri-fullscreen-exit-line");
+              dom.fullscreenIcon.classList.add("ri-fullscreen-line");
+            }
+          });
+
+          // 为创建页面的语音预览按钮绑定事件
+          dom.previewCreateVoiceBtn.addEventListener("click", () => {
+            previewSelectedVoice(dom.eventVoiceSelect);
+          });
+
+          dom.modalContent.onclick = (e) => {
+            const container = e.target.closest("[data-gift-index]");
+            if (!container) return;
+            const giftIndex = parseInt(container.dataset.giftIndex, 10);
+            if (e.target.id === "btn-correct-name") enableInlineEdit(giftIndex, "name");
+            if (e.target.id === "btn-modify-amount") enableInlineEdit(giftIndex, "amount");
+            if (e.target.id === "btn-edit-remarks") enableInlineEdit(giftIndex, "remarks");
+          };
+          // 全局事件
+          window.addEventListener("click", () => dom.eventDropdown.classList.add("hidden"));
+
+          // 弹窗内事件委托 (处理搜索结果中的“查看详情”按钮)
+          dom.modalContainer.addEventListener("click", (e) => {
+            if (e.target.matches(".view-details-btn")) {
+              const giftIndex = parseInt(e.target.dataset.giftIndex, 10);
+              if (!isNaN(giftIndex)) {
+                closeModal();
+                // 延迟显示，确保上一个弹窗关闭动画完成
+                setTimeout(() => showGiftDetailsModal(giftIndex), 150);
+              }
+            }
+          });
+
+          //全局键盘快捷键监听 ---
+          document.addEventListener("keydown", (e) => {
+            // 快捷键 Ctrl + P 触发打印
+            if (e.ctrlKey && e.key.toLowerCase() === "p") {
+              e.preventDefault();
+              prepareForPrint();
+              return;
+            }
+
+            const isModalVisible = !dom.modalContainer.classList.contains("hidden");
+            const activeElement = document.activeElement;
+
+            // 如果弹窗可见, 则执行弹窗内的快捷键逻辑
+            if (isModalVisible) {
+              // Escape 键关闭弹窗
+              if (e.key === "Escape") {
+                e.preventDefault();
+                dom.modalActions.querySelector("button")?.click();
+              }
+              // Enter 键确认弹窗 (文本域除外)
+              if (e.key === "Enter" && activeElement.tagName !== "TEXTAREA") {
+                e.preventDefault();
+                dom.modalActions.querySelector("button:last-child")?.click();
+              }
+              return; // 弹窗打开时，不触发后续的全局快捷键
+            }
+
+            // --- 核心修复：全局回车提交礼金表单 ---
+            // 当按下回车键, 且主界面可见, 且当前焦点不在多行文本框时
+            if (e.key === "Enter" && !dom.mainScreen.classList.contains("hidden") && activeElement.tagName !== "TEXTAREA") {
+              const guestName = dom.guestNameInput.value.trim();
+              const giftAmount = dom.giftAmountInput.value.trim();
+
+              // 检查必填项（姓名和金额）是否已填写
+              if (guestName && giftAmount) {
+                // 阻止回车键的任何默认行为 (例如，如果焦点在某个按钮上)
+                e.preventDefault();
+                // 模拟点击“确认录入”按钮
+                dom.addGiftForm.querySelector('button[type="submit"]')?.click();
+              }
+            }
+          });
+        }
+
+        // --- 应用初始化 ---
+        function init() {
+          initDB();
+          setDefaultTimes();
+          bindEventListeners();
+          populateVoiceList(dom.eventVoiceSelect);
+          if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => populateVoiceList(dom.eventVoiceSelect);
+          }
+        }
+
+        init(); // 启动应用
+      });
+    </script>
+  </body>
 </html>
